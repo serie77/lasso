@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lasso · App</title>
+<meta name="description" content="Perpetuals on Hooke. Trade XMAX with leverage, provide liquidity, farm $LASSO.">
+<link rel="icon" href="lasso.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0B0B0C; --s1: #111113; --s2: #17171A; --line: #1F1F23; --line2: #2A2A2F;
+  --fg: #EDEBE6; --mut: #8A8880; --dim: #7D7B75;
+  --acc: #FF7A2F; --up: #3DD68C; --dn: #F2555A;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+* { box-sizing: border-box; margin: 0 }
+html, body { background: var(--bg); color: var(--fg) }
+body { font: 14px/1.45 'Inter Tight', system-ui, sans-serif; -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer }
+button:disabled { cursor: default }
+input { font: inherit; color: inherit; background: none; border: 0; outline: 0; width: 100%; min-width: 0 }
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none }
+input[type=number] { -moz-appearance: textfield }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.01em }
+.mut { color: var(--mut) } .up { color: var(--up) } .dn { color: var(--dn) } .acc { color: var(--acc) }
+
+/* top bar */
+header { height: 56px; display: flex; align-items: center; gap: 28px; padding: 0 20px; border-bottom: 1px solid var(--line) }
+.brand { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 19px; letter-spacing: -.04em; color: inherit; text-decoration: none }
+.docs { color: var(--mut); text-decoration: none; font-weight: 500; padding: 6px 12px }
+.docs:hover { color: var(--fg) }
+.brand img { width: 30px; height: 30px; margin: 0 -2px 0 -6px }
+nav { display: flex; gap: 4px }
+nav button { padding: 6px 12px; border-radius: 8px; color: var(--mut); font-weight: 500 }
+nav button:hover { color: var(--fg) }
+nav button.on { color: var(--fg); background: var(--s2) }
+.sp { flex: 1 }
+.pill { height: 34px; padding: 0 14px; border-radius: 999px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px }
+.pill.solid { background: var(--fg); color: var(--bg) }
+.pill.line { border: 1px solid var(--line2) }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--up) }
+
+main { flex: 1; width: 100%; max-width: 1360px; margin: 0 auto; padding: 20px }
+.view { display: none } .view.on { display: block }
+
+/* trade */
+.mbar { display: flex; align-items: center; gap: 28px; padding: 4px 0 18px; flex-wrap: wrap }
+.mtabs { display: flex; background: var(--s1); border: 1px solid var(--line); border-radius: 10px; padding: 3px }
+.mtabs button { padding: 6px 14px; border-radius: 7px; color: var(--mut); font-weight: 500 }
+.mtabs button.on { background: var(--s2); color: var(--fg) }
+.mprice { font-size: 26px; font-weight: 500 }
+.stat small { display: block; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px }
+.stat span { font-size: 13px }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px }
+.card { background: var(--s1); border: 1px solid var(--line); border-radius: 14px }
+.chart { height: 380px; position: relative; overflow: hidden }
+.chart svg { position: absolute; inset: 0; width: 100%; height: 100% }
+.chart .hover { position: absolute; top: 14px; left: 16px; font-size: 12px; pointer-events: none }
+.chart .empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--dim) }
+.tabs { display: flex; gap: 20px; padding: 0 16px; border-bottom: 1px solid var(--line) }
+.tabs button { padding: 12px 0; color: var(--mut); font-weight: 500; border-bottom: 1px solid transparent; margin-bottom: -1px }
+.tabs button.on { color: var(--fg); border-color: var(--fg) }
+table { width: 100%; border-collapse: collapse }
+th { text-align: left; font-weight: 400; color: var(--dim); font-size: 12px; padding: 10px 16px }
+td { padding: 11px 16px; border-top: 1px solid var(--line); white-space: nowrap }
+th.r, td.r { text-align: right }
+.tablewrap { overflow-x: auto }
+.none { padding: 28px 16px; color: var(--dim); text-align: center }
+.mini { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--line2); font-size: 12px }
+.mini:hover { border-color: var(--mut) }
+
+/* order panel */
+.ticket { padding: 16px; display: flex; flex-direction: column; gap: 14px; align-self: start }
+.side { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg); border-radius: 10px; padding: 3px }
+.side button { padding: 9px; border-radius: 8px; color: var(--mut); font-weight: 500 }
+.side button.on.long { background: rgba(61,214,140,.12); color: var(--up) }
+.side button.on.short { background: rgba(242,85,90,.12); color: var(--dn) }
+.side.neutral button.on { background: var(--s2); color: var(--fg) }
+.field { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px }
+.field:focus-within { border-color: var(--line2) }
+.field .top { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin-bottom: 4px }
+.field .top button { color: var(--mut); font-size: 12px }
+.field .row { display: flex; align-items: center; gap: 8px }
+.field input { font-family: var(--mono); font-size: 20px }
+.field .unit { color: var(--mut); font-weight: 500 }
+.lev { display: flex; flex-direction: column; gap: 8px }
+.lev .top { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim) }
+.lev .top b { color: var(--fg); font-weight: 500; font-family: var(--mono) }
+input[type=range] { -webkit-appearance: none; appearance: none; height: 2px; background: var(--line2); border-radius: 2px }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--fg); border: 3px solid var(--bg); box-shadow: 0 0 0 1px var(--line2) }
+input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--fg); border: 3px solid var(--bg) }
+.ticks { position: relative; height: 14px; margin: 0 8px; font-size: 11px }
+.ticks button { position: absolute; transform: translateX(-50%) }
+.ticks button { color: var(--dim); font-size: 11px } .ticks button:hover { color: var(--fg) }
+.summary { display: flex; flex-direction: column; gap: 7px; font-size: 13px }
+.summary div { display: flex; justify-content: space-between }
+.summary span:first-child { color: var(--mut) }
+.cta { height: 46px; border-radius: 10px; font-weight: 600; font-size: 15px; background: var(--fg); color: var(--bg) }
+.cta.long { background: var(--up); color: #06140C } .cta.short { background: var(--dn); color: #1A0607 }
+.cta:disabled { background: var(--s2); color: var(--dim) }
+.note { font-size: 12px; color: var(--dim); line-height: 1.5 }
+.closed { display: none; background: var(--bg); border: 1px solid var(--line2); border-radius: 12px; padding: 14px }
+.closed.on { display: block }
+.closed .head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px }
+.closed .head b { font-weight: 500 }
+.closed .clock { font-family: var(--mono); font-size: 20px; letter-spacing: -.01em }
+.closed p { font-size: 12px; color: var(--mut); line-height: 1.55; margin-top: 8px }
+.closed button { margin-top: 12px; width: 100%; height: 40px; border-radius: 9px; border: 1px solid var(--line2); font-weight: 500 }
+.closed button:hover { border-color: var(--mut) }
+.closed button span { color: var(--up) }
+.chip { font-size: 12px; color: var(--mut); border: 1px solid var(--line2); border-radius: 6px; padding: 1px 7px; font-family: var(--mono) }
+
+/* earn / farm */
+.page { max-width: 980px; margin: 0 auto; padding-top: 24px }
+.hero h1 { font-size: 40px; font-weight: 500; letter-spacing: -.035em; line-height: 1.1 }
+.hero p { color: var(--mut); margin-top: 10px; max-width: 560px; font-size: 15px }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin: 32px 0 }
+.kpis > div { padding: 18px 0 }
+.kpis > div + div { padding-left: 20px; border-left: 1px solid var(--line) }
+.kpis small { display: block; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px }
+.kpis b { font-size: 22px; font-weight: 500 }
+.two { display: grid; grid-template-columns: 1fr 380px; gap: 16px; align-items: start }
+.box { padding: 20px }
+.box h3 { font-size: 13px; font-weight: 500; color: var(--mut); margin-bottom: 16px }
+.big { font-size: 36px; font-weight: 500; letter-spacing: -.02em }
+.lines { display: flex; flex-direction: column; gap: 10px; font-size: 13px }
+.lines div { display: flex; justify-content: space-between; gap: 12px }
+.lines span:first-child { color: var(--mut) }
+.bar { height: 4px; background: var(--s2); border-radius: 4px; overflow: hidden; margin: 14px 0 6px }
+.bar i { display: block; height: 100%; background: var(--acc) }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px }
+.steps .card { padding: 18px }
+.steps b { display: block; font-weight: 500; margin: 8px 0 4px }
+.steps p { color: var(--mut); font-size: 13px }
+.steps .n { font-family: var(--mono); font-size: 12px; color: var(--acc) }
+
+/* toasts */
+#toasts { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 10 }
+.toast { background: var(--s2); border: 1px solid var(--line2); border-radius: 10px; padding: 10px 14px; font-size: 13px; max-width: 340px; box-shadow: 0 8px 30px rgba(0,0,0,.4) }
+.toast a { color: var(--mut) }
+.toast.err { border-color: rgba(242,85,90,.4) }
+
+footer { border-top: 1px solid var(--line); padding: 14px 20px; display: flex; gap: 18px; font-size: 12px; color: var(--dim) }
+footer a { color: var(--dim); text-decoration: none } footer a:hover { color: var(--mut) }
+
+@media (max-width: 960px) {
+  .grid, .two { grid-template-columns: minmax(0, 1fr) }
+  .kpis { grid-template-columns: 1fr 1fr } .kpis > div:nth-child(3) { padding-left: 0; border-left: 0 }
+  .steps { grid-template-columns: 1fr }
+}
+@media (max-width: 640px) {
+  header { gap: 12px; padding: 0 16px } .brand span { display: none } .docs { display: none }
+  main { padding: 16px }
+  nav button { padding: 6px 8px }
+  .chart { height: 260px }
+  .hero h1 { font-size: 30px }
+  .mbar { gap: 18px }
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="index.html"><img src="lasso.svg" alt=""><span>lasso</span></a>
+  <nav>
+    <button data-view="trade" class="on">Trade</button>
+    <button data-view="earn">Earn</button>
+    <button data-view="farm">Farm</button>
+  </nav>
+  <div class="sp"></div>
+  <a class="docs" href="docs.html">Docs</a>
+  <button id="connect" class="pill solid">Connect</button>
+</header>
+
+<main>
+  <!-- TRADE -->
+  <section id="trade" class="view on">
+    <div class="mbar">
+      <div class="mtabs" id="mtabs"></div>
+      <div class="mprice num" id="mPrice">—</div>
+      <div class="stat"><small>Status</small><span id="mStatus">—</span></div>
+      <div class="stat"><small>Long OI</small><span class="num" id="mLong">—</span></div>
+      <div class="stat"><small>Short OI</small><span class="num" id="mShort">—</span></div>
+      <div class="stat"><small>Token premium</small><span class="num" id="mPrem">—</span></div>
+      <div class="stat"><small>Max leverage</small><span class="num" id="mMax">—</span></div>
+    </div>
+    <div class="grid">
+      <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+        <div class="card chart" id="chart"><div class="empty">Loading price history</div></div>
+        <div class="card">
+          <div class="tabs" id="ptabs"><button class="on" data-t="positions">Positions</button><button data-t="orders">Orders</button></div>
+          <div class="tablewrap" id="ptable"><div class="none">Connect a wallet to see positions</div></div>
+        </div>
+      </div>
+      <div class="card ticket">
+        <div class="side"><button class="long on" data-side="long">Long</button><button class="short" data-side="short">Short</button></div>
+        <div class="field">
+          <div class="top"><span>Collateral</span><button id="maxBtn">Balance <span class="num" id="bal">—</span></button></div>
+          <div class="row"><input id="amt" type="number" inputmode="decimal" placeholder="0.00" min="0"><span class="unit">USDG</span></div>
+        </div>
+        <div class="lev">
+          <div class="top"><span>Leverage</span><b id="levV">3x</b></div>
+          <input id="lev" type="range" min="1" max="10" step="0.5" value="3">
+          <div class="ticks" id="ticks"></div>
+        </div>
+        <div class="summary">
+          <div><span>Position size</span><span class="num" id="sSize">—</span></div>
+          <div><span>Entry</span><span class="num" id="sEntry">—</span></div>
+          <div><span>Liquidation</span><span class="num" id="sLiq">—</span></div>
+          <div><span>Fees</span><span class="num" id="sFee">—</span></div>
+          <div><span>Slippage</span><button class="chip" id="slip">0.5%</button></div>
+        </div>
+        <div class="closed" id="closedBox">
+          <div class="head"><b>Share market closed</b><span class="mut" style="font-size:12px">opens in</span></div>
+          <div class="clock" id="openIn">—</div>
+          <p>XMAX follows the real share, which is frozen until the bell. Opening against a frozen price would let anyone trade overnight news before it moves, so new XMAX positions wait for the open. Closing works anytime, at a 0.5% spread.</p>
+          <button id="toHx">Trade hXMAX now · <span>24/7</span></button>
+        </div>
+        <button class="cta long" id="submit" disabled>Connect wallet</button>
+        <div class="note" id="tnote">Orders fill at the next Hooke price, usually within seconds. If price moves past your slippage, the order is cancelled and refunded.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EARN -->
+  <section id="earn" class="view">
+    <div class="page">
+      <div class="hero">
+        <h1>Be the house.</h1>
+        <p>Deposit USDG into the Lasso pool. It takes the other side of every trade and earns 80% of all fees and trader losses, plus $LASSO every second.</p>
+      </div>
+      <div class="kpis">
+        <div><small>Pool value</small><b class="num" id="eTvl">—</b></div>
+        <div><small>LLP price</small><b class="num" id="ePrice">—</b></div>
+        <div><small>Utilization</small><b class="num" id="eUtil">—</b></div>
+        <div><small>$LASSO / day to LPs</small><b class="num" id="eRate">—</b></div>
+      </div>
+      <div class="two">
+        <div class="card box">
+          <h3>Your liquidity</h3>
+          <div class="big num" id="eMine">$0.00</div>
+          <div class="lines" style="margin-top:18px">
+            <div><span>LLP balance</span><span class="num" id="eLlp">0</span></div>
+            <div><span>Pool share</span><span class="num" id="eShare">0%</span></div>
+            <div><span>Earning</span><span class="num" id="eDaily">0 $LASSO / day</span></div>
+          </div>
+        </div>
+        <div class="card ticket">
+          <div class="side neutral"><button class="on" data-lp="deposit">Deposit</button><button data-lp="withdraw">Withdraw</button></div>
+          <div class="field">
+            <div class="top"><span id="lLabel">Amount</span><button id="lMax">Balance <span class="num" id="lBal">—</span></button></div>
+            <div class="row"><input id="lAmt" type="number" inputmode="decimal" placeholder="0.00" min="0"><span class="unit" id="lUnit">USDG</span></div>
+          </div>
+          <div class="summary">
+            <div><span>You receive</span><span class="num" id="lOut">—</span></div>
+            <div><span>Fee</span><span class="num">0.10%</span></div>
+          </div>
+          <button class="cta" id="lSubmit" disabled>Connect wallet</button>
+          <div class="note">Withdrawals are always open, up to what is not backing open positions.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FARM -->
+  <section id="farm" class="view">
+    <div class="page">
+      <div class="hero">
+        <h1>Farm <span class="acc">$LASSO</span>.</h1>
+        <p>Season 1 distributes 10,000,000 $LASSO over 30 days, tracked onchain. Every point is one $LASSO, claimable when the token launches on Hooke.</p>
+      </div>
+      <div class="kpis">
+        <div><small>Season ends</small><b class="num" id="fEnds">—</b></div>
+        <div><small>Emitted so far</small><b class="num" id="fEmitted">—</b></div>
+        <div><small>Today's trading pool</small><b class="num" id="fToday">—</b></div>
+        <div><small>Epoch resets in</small><b class="num" id="fReset">—</b></div>
+      </div>
+      <div class="two">
+        <div class="card box">
+          <h3>Your $LASSO</h3>
+          <div class="big num" id="fMine">0</div>
+          <div class="lines" style="margin-top:18px">
+            <div><span>Trading today (est.)</span><span class="num" id="fMineToday">0</span></div>
+            <div><span>Your fees today</span><span class="num" id="fFees">$0.00</span></div>
+            <div><span>From liquidity</span><span class="num" id="fLpDaily">0 / day</span></div>
+          </div>
+          <div class="bar"><i id="fBar" style="width:0%"></i></div>
+          <div class="note" id="fBarNote">—</div>
+          <button class="cta" id="claim" style="width:100%;margin-top:18px" disabled>Claim opens at token launch</button>
+        </div>
+        <div class="card box">
+          <h3>How it works</h3>
+          <div class="lines">
+            <div><span>Liquidity</span><span class="num">6,000,000</span></div>
+            <div><span>Trading</span><span class="num">4,000,000</span></div>
+          </div>
+          <p class="note" style="margin-top:16px">Liquidity earns continuously, pro-rata to your LLP balance. You don't need to stake.</p>
+          <p class="note" style="margin-top:10px">Trading earns per UTC day: each day's trading emission is split by the share of fees you paid that day. It becomes claimable at 00:00 UTC.</p>
+          <p class="note" style="margin-top:10px">All payouts round down, so the farm can never owe more than it emitted.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Lasso · perpetuals on Hooke · Robinhood Chain</span>
+  <span class="sp"></span>
+  <a href="docs.html">Docs</a>
+  <a id="explorerLink" target="_blank" rel="noopener">Contracts</a>
+</footer>
+<div id="toasts"></div>
+
+<script src="config.js"></script>
+<script type="module">
+import { createPublicClient, createWalletClient, custom, http, parseAbi, formatUnits, parseUnits, encodeAbiParameters, keccak256, maxUint256 } from 'https://cdn.jsdelivr.net/npm/viem@2.21.0/+esm';
+
+// ---------- config ----------
+const C = window.LASSO;
+const RPC = C.rpc;
+const EXPLORER = C.explorer;
+const CHAIN = { id: 4663, name: 'Robinhood Chain', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: [RPC] } }, blockExplorers: { default: { name: 'Blockscout', url: EXPLORER } }, contracts: { multicall3: { address: '0xcA11bde05977b3631167028862bE2a173976CA11' } } };
+
+const lassoAbi = parseAbi([
+  'function marketCount() view returns (uint256)',
+  'function getMarketConfig(uint16) view returns ((string name,(uint8 source,bytes32 feedId,address feeHook,uint32 twapWindow,uint8 tokenDecimals,uint8 quoteDecimals) price,bool active,bool allowIncreaseWhenClosed,uint16 closedSpreadBps,uint16 maxLeverageX,uint16 maintenanceBps,uint16 openFeeBps,uint16 closeFeeBps,uint16 tensionFeeMaxBps,uint128 maxOiUsd,uint128 borrowRatePerSec))',
+  'function getMarketState(uint16) view returns ((uint256 longOi,uint256 shortOi,uint256 longSizeOverEntry,uint256 shortSizeOverEntry,uint256 borrowIndex,uint256 lastBorrowUpdate))',
+  'function markPrice(uint16) view returns (uint256,bool)',
+  'function tensionFeeBps(uint16,bool,uint256) view returns (uint256)',
+  'function poolValueUsd() view returns (uint256)',
+  'function poolTokensUsd() view returns (uint256)',
+  'function totalOi() view returns (uint256)',
+  'function params() view returns (uint32 minExecDelay,uint32 orderTtl,uint16 protocolShareBps,uint16 lpFeeBps,uint128 liquidationFeeUsd,uint128 minCollateralUsd)',
+  'function getPosition(bytes32) view returns ((uint256 size,uint256 collateral,uint256 entryPrice,uint256 entryBorrowIndex,address token))',
+  'function positionHealth(bytes32) view returns (int256 equityUsd,int256 pnlUsd,uint256 feeUsd,uint256 price,bool liquidatable)',
+  'function orderCount() view returns (uint256)',
+  'function getOrder(uint256) view returns ((address trader,uint16 market,bool isLong,bool isIncrease,address token,uint256 collateralDelta,uint256 sizeDelta,uint256 acceptablePrice,uint64 createdAt,uint8 status))',
+  'function createOrder(uint16,bool,bool,address,uint256,uint256,uint256) payable returns (uint256)',
+  'function cancelOrder(uint256)',
+  'function deposit(address,uint256) payable returns (uint256)',
+  'function withdraw(uint256,address) returns (uint256)',
+]);
+const adapterAbi = parseAbi(['function hookeState(address) view returns (uint256,uint256,int256,uint256,uint256,bool)']);
+const erc20 = parseAbi(['function balanceOf(address) view returns (uint256)', 'function allowance(address,address) view returns (uint256)', 'function approve(address,uint256) returns (bool)', 'function totalSupply() view returns (uint256)']);
+const farmAbi = parseAbi([
+  'function lpRate() view returns (uint256)', 'function tradeRate() view returns (uint256)',
+  'function start() view returns (uint64)', 'function end() view returns (uint64)',
+  'function totalEmitted() view returns (uint256)', 'function currentEpoch() view returns (uint256)',
+  'function epochEmission(uint256) view returns (uint256)', 'function epochFees(uint256) view returns (uint256)',
+  'function traderEpoch(address) view returns (uint256)', 'function traderFees(address) view returns (uint256)',
+  'function earned(address) view returns (uint256 claimable,uint256 today)', 'function lasso() view returns (address)',
+  'function claim() returns (uint256)',
+]);
+
+// ---------- state ----------
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const pub = createPublicClient({ chain: CHAIN, transport: http(RPC), batch: { multicall: true } });
+const L = { address: C.lasso, abi: lassoAbi }, F = { address: C.farm, abi: farmAbi };
+const S = { markets: [], m: 0, side: 'long', lpMode: 'deposit', slip: 50, account: null, wallet: null, user: {}, pool: {}, farm: {}, params: null };
+const live = C.lasso !== '0x0000000000000000000000000000000000000000';
+
+// ---------- format ----------
+const n = (v, d = 18) => Number(formatUnits(v, d));
+const usdg = x => parseUnits(Number(x).toFixed(6), 6);
+const fmtUsd = (x, dp = 2) => (x < 0 ? '-$' : '$') + Math.abs(x).toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+const fmtPx = x => '$' + x.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+const fmtTok = (x, dp = 0) => x.toLocaleString('en-US', { maximumFractionDigits: dp });
+const fmtCompact = x => x >= 1e6 ? (x / 1e6).toFixed(2) + 'M' : x >= 1e3 ? (x / 1e3).toFixed(1) + 'K' : x.toFixed(0);
+const errMsg = e => {
+  const m = e?.shortMessage ?? e?.message ?? 'Something went wrong';
+  if (/User rejected|denied/i.test(m)) return 'Transaction cancelled';
+  return m.split('\n')[0].replace(/^.*reverted with the following reason:\s*/i, '');
+};
+function toast(html, err = false, ms = 6000) {
+  const el = document.createElement('div'); el.className = 'toast' + (err ? ' err' : ''); el.innerHTML = html;
+  $('#toasts').prepend(el); setTimeout(() => el.remove(), ms); return el;
+}
+
+// ---------- nav ----------
+$$('nav button').forEach(b => b.onclick = () => {
+  $$('nav button').forEach(x => x.classList.toggle('on', x === b));
+  $$('.view').forEach(v => v.classList.toggle('on', v.id === b.dataset.view));
+  history.replaceState(null, '', '#' + b.dataset.view);
+});
+const initial = location.hash.slice(1); if (['earn', 'farm'].includes(initial)) $(`nav [data-view=${initial}]`).click();
+$('#explorerLink').href = `${EXPLORER}/address/${C.lasso}`;
+
+// ---------- wallet ----------
+$('#connect').onclick = async () => {
+  if (S.account) return;
+  if (!window.ethereum) return toast('No wallet found. Install a browser wallet to trade.', true);
+  try {
+    S.wallet = createWalletClient({ chain: CHAIN, transport: custom(window.ethereum) });
+    [S.account] = await S.wallet.requestAddresses();
+    try { await S.wallet.switchChain({ id: CHAIN.id }); } catch { await S.wallet.addChain({ chain: CHAIN }); }
+    $('#connect').innerHTML = `<span class="dot"></span>${S.account.slice(0, 6)}…${S.account.slice(-4)}`;
+    $('#connect').className = 'pill line';
+    window.ethereum.on?.('accountsChanged', a => { S.account = a[0] ?? null; refresh(); });
+    refresh();
+  } catch (e) { toast(errMsg(e), true); }
+};
+
+async function send(contract, functionName, args, label) {
+  const t = toast(`${label}…`, false, 60000);
+  try {
+    const { request } = await pub.simulateContract({ ...contract, functionName, args, account: S.account });
+    const hash = await S.wallet.writeContract(request);
+    t.innerHTML = `${label} · pending <a href="${EXPLORER}/tx/${hash}" target="_blank" rel="noopener">view</a>`;
+    const r = await pub.waitForTransactionReceipt({ hash });
+    t.remove();
+    if (r.status !== 'success') throw new Error('Transaction failed');
+    toast(`${label} · confirmed <a href="${EXPLORER}/tx/${hash}" target="_blank" rel="noopener">view</a>`);
+    refresh();
+    return true;
+  } catch (e) { t.remove(); toast(errMsg(e), true); return false; }
+}
+async function approveIfNeeded(amount) {
+  if (S.user.allowance >= amount) return true;
+  return send({ address: C.usdg, abi: erc20 }, 'approve', [C.lasso, maxUint256], 'Approve USDG');
+}
+
+// ---------- data ----------
+async function refresh() {
+  if (!live) return renderNotLive();
+  try {
+    const count = Number(await pub.readContract({ ...L, functionName: 'marketCount' }));
+    const ids = [...Array(count).keys()];
+    const [cfgs, states, marks, poolValue, poolTokens, totalOi, llpSupply, params] = await Promise.all([
+      Promise.all(ids.map(i => pub.readContract({ ...L, functionName: 'getMarketConfig', args: [i] }))),
+      Promise.all(ids.map(i => pub.readContract({ ...L, functionName: 'getMarketState', args: [i] }))),
+      Promise.all(ids.map(i => pub.readContract({ ...L, functionName: 'markPrice', args: [i] }).catch(() => [0n, false]))),
+      pub.readContract({ ...L, functionName: 'poolValueUsd' }).catch(() => 0n),
+      pub.readContract({ ...L, functionName: 'poolTokensUsd' }).catch(() => 0n),
+      pub.readContract({ ...L, functionName: 'totalOi' }),
+      pub.readContract({ address: C.lp, abi: erc20, functionName: 'totalSupply' }),
+      S.params ?? pub.readContract({ ...L, functionName: 'params' }),
+    ]);
+    S.params = params;
+    const hooke = await pub.readContract({ address: C.adapter, abi: adapterAbi, functionName: 'hookeState', args: [C.feeHook] }).catch(() => null);
+    S.markets = ids.map(i => ({ id: i, cfg: cfgs[i], st: states[i], mark: n(marks[i][0]), markRaw: marks[i][0], open: marks[i][1] }));
+    S.hooke = hooke;
+    S.pool = { value: n(poolValue), tokens: n(poolTokens), oi: n(totalOi), supply: n(llpSupply) };
+    await refreshFarm();
+    if (S.account) await refreshUser();
+    renderAll();
+  } catch {}
+}
+
+async function refreshFarm() {
+  const [lpRate, tradeRate, start, end, emitted, epoch, lasso] = await Promise.all(['lpRate', 'tradeRate', 'start', 'end', 'totalEmitted', 'currentEpoch', 'lasso'].map(f => pub.readContract({ ...F, functionName: f })));
+  const [epochEmission, epochFees] = await Promise.all([
+    pub.readContract({ ...F, functionName: 'epochEmission', args: [epoch] }),
+    pub.readContract({ ...F, functionName: 'epochFees', args: [epoch] }),
+  ]);
+  S.farm = { lpRate: n(lpRate), tradeRate: n(tradeRate), start: Number(start), end: Number(end), emitted: n(emitted), epoch, epochEmission: n(epochEmission), epochFees: n(epochFees), lasso };
+}
+
+async function refreshUser() {
+  const a = S.account;
+  const keys = [];
+  for (const m of S.markets) for (const isLong of [true, false]) keys.push({ m, isLong, key: keccak256(encodeAbiParameters([{ type: 'address' }, { type: 'uint16' }, { type: 'bool' }], [a, m.id, isLong])) });
+  const [bal, allowance, llp, earned, tEpoch, tFees, orderCount] = await Promise.all([
+    pub.readContract({ address: C.usdg, abi: erc20, functionName: 'balanceOf', args: [a] }),
+    pub.readContract({ address: C.usdg, abi: erc20, functionName: 'allowance', args: [a, C.lasso] }),
+    pub.readContract({ address: C.lp, abi: erc20, functionName: 'balanceOf', args: [a] }),
+    pub.readContract({ ...F, functionName: 'earned', args: [a] }),
+    pub.readContract({ ...F, functionName: 'traderEpoch', args: [a] }),
+    pub.readContract({ ...F, functionName: 'traderFees', args: [a] }),
+    pub.readContract({ ...L, functionName: 'orderCount' }),
+  ]);
+  const positions = (await Promise.all(keys.map(async k => {
+    const p = await pub.readContract({ ...L, functionName: 'getPosition', args: [k.key] });
+    if (p.size === 0n) return null;
+    const h = await pub.readContract({ ...L, functionName: 'positionHealth', args: [k.key] }).catch(() => null);
+    return { ...k, p, h };
+  }))).filter(Boolean);
+  const from = orderCount > 100n ? orderCount - 100n : 0n;
+  const ids = []; for (let i = from; i < orderCount; i++) ids.push(i);
+  const orders = (await Promise.all(ids.map(i => pub.readContract({ ...L, functionName: 'getOrder', args: [i] }).then(o => ({ id: i, ...o })))))
+    .filter(o => o.trader.toLowerCase() === a.toLowerCase() && o.status === 1);
+  S.user = { bal, allowance, llp, claimable: n(earned[0]), today: n(earned[1]), feesToday: tEpoch === S.farm.epoch ? n(tFees) : 0, positions, orders };
+}
+
+// ---------- render ----------
+function renderNotLive() {
+  $('#chart').innerHTML = '<div class="empty">Launching soon</div>';
+  $('#submit').textContent = 'Launching soon'; $('#lSubmit').textContent = 'Launching soon';
+}
+
+function renderAll() { renderMarket(); renderTicket(); renderTable(); renderEarn(); renderFarm(); }
+
+function renderMarket() {
+  const m = S.markets[S.m]; if (!m) return;
+  $('#mtabs').innerHTML = S.markets.map(x => `<button data-m="${x.id}" class="${x.id === S.m ? 'on' : ''}">${x.cfg.name}</button>`).join('');
+  $$('#mtabs button').forEach(b => b.onclick = () => { S.m = Number(b.dataset.m); renderAll(); loadChart(); });
+  $('#mPrice').textContent = m.mark ? fmtPx(m.mark) : '—';
+  const oracle = m.cfg.price.source === 0;
+  renderClock();
+  $('#mLong').textContent = fmtUsd(n(m.st.longOi), 0);
+  $('#mShort').textContent = fmtUsd(n(m.st.shortOi), 0);
+  $('#mPrem').textContent = S.hooke ? (n(S.hooke[2], 16) >= 0 ? '+' : '') + n(S.hooke[2], 16).toFixed(2) + '%' : '—';
+  $('#mMax').textContent = m.cfg.maxLeverageX + 'x';
+  const lev = $('#lev'); lev.max = m.cfg.maxLeverageX; if (Number(lev.value) > m.cfg.maxLeverageX) lev.value = m.cfg.maxLeverageX;
+  const max = m.cfg.maxLeverageX, steps = max <= 5 ? [1, 2, 3, 4, 5] : [1, 2, 5, 10];
+  $('#ticks').innerHTML = steps.map(s => `<button data-l="${s}" style="left:${(s - 1) / (max - 1) * 100}%">${s}x</button>`).join('');
+  $$('#ticks button').forEach(b => b.onclick = () => { lev.value = b.dataset.l; renderTicket(); });
+}
+
+function quote() {
+  const m = S.markets[S.m]; if (!m || !m.mark) return null;
+  const collat = Number($('#amt').value || 0), lev = Number($('#lev').value), isLong = S.side === 'long';
+  const st = m.st, cfg = m.cfg;
+  // fee rate depends on the skew the trade creates; solve size = (collat - fee) * lev
+  let feeBps = cfg.openFeeBps, size = 0;
+  for (let i = 0; i < 3; i++) {
+    size = collat * lev / (1 + lev * feeBps / 1e4);
+    const l = n(st.longOi) + (isLong ? size : 0), s = n(st.shortOi) + (isLong ? 0 : size);
+    const [heavy, light] = isLong ? [l, s] : [s, l];
+    const tension = heavy > light && heavy + light > 0 ? Math.floor(cfg.tensionFeeMaxBps * (heavy - light) / (heavy + light)) : 0;
+    feeBps = cfg.openFeeBps + tension;
+  }
+  size = size * 0.999; // headroom for rounding
+  const fee = size * feeBps / 1e4, c = collat - fee;
+  const keep = size * (cfg.maintenanceBps + cfg.closeFeeBps) / 1e4;
+  const liq = size ? m.mark * (isLong ? 1 - (c - keep) / size : 1 + (c - keep) / size) : 0;
+  return { m, collat, size, fee, feeBps, liq, isLong };
+}
+
+function renderTicket() {
+  $('#levV').textContent = Number($('#lev').value) + 'x';
+  const q = quote(), btn = $('#submit');
+  $('#bal').textContent = S.account && S.user.bal !== undefined ? fmtTok(n(S.user.bal, 6), 2) : '—';
+  $$('.side [data-side]').forEach(b => b.classList.toggle('on', b.dataset.side === S.side));
+  btn.className = 'cta ' + S.side;
+  if (!q) return;
+  $('#sSize').textContent = q.size ? fmtUsd(q.size) : '—';
+  $('#sEntry').textContent = fmtPx(q.m.mark);
+  $('#sLiq').textContent = q.size && q.liq > 0 ? fmtPx(q.liq) : '—';
+  $('#sFee').textContent = q.size ? `${fmtUsd(q.fee)} · ${(q.feeBps / 100).toFixed(2)}%` : '—';
+  const name = q.m.cfg.name, oracle = q.m.cfg.price.source === 0;
+  const minC = S.params ? n(S.params[5]) : 5;
+  let label = `${S.side === 'long' ? 'Long' : 'Short'} ${name}`, ok = true;
+  if (!S.account) { label = 'Connect wallet'; ok = true; }
+  else if (oracle && !q.m.open && !q.m.cfg.allowIncreaseWhenClosed) { label = 'Market closed'; ok = false; }
+  else if (!q.collat) { label = 'Enter an amount'; ok = false; }
+  else if (usdg(q.collat) > S.user.bal) { label = 'Not enough USDG'; ok = false; }
+  else if (q.collat - q.fee < minC) { label = `Minimum ${fmtUsd(minC + q.fee, 0)} collateral`; ok = false; }
+  else if (S.user.allowance < usdg(q.collat)) label = 'Approve USDG';
+  btn.textContent = label; btn.disabled = !ok;
+  const closed = oracle && !q.m.open && !q.m.cfg.allowIncreaseWhenClosed;
+  $('#closedBox').classList.toggle('on', closed);
+  btn.style.display = closed ? 'none' : '';
+  const tax = !oracle && S.hooke ? `Buying hXMAX spot on Hooke costs ${(Number(S.hooke[3]) / 1e4).toFixed(1)}% right now and selling ${(Number(S.hooke[4]) / 1e4).toFixed(1)}%. Here it's ${(q.feeBps / 100).toFixed(2)}% to open, 0.10% to close. ` : '';
+  $('#tnote').textContent = closed
+    ? 'Have an open XMAX position? Close it from the positions table below.'
+    : tax + 'Orders fill at the next Hooke price, usually within seconds. If price moves past your slippage, the order is cancelled and refunded.';
+}
+
+// ---------- US market clock (NYSE hours; the Hooke oracle's open flag is the source of truth) ----------
+const HOLIDAYS = new Set(['2026-01-01', '2026-01-19', '2026-02-16', '2026-04-03', '2026-05-25', '2026-06-19', '2026-07-03', '2026-09-07', '2026-11-26', '2026-12-25',
+  '2027-01-01', '2027-01-18', '2027-02-15', '2027-03-26', '2027-05-31', '2027-06-18', '2027-07-05', '2027-09-06', '2027-11-25', '2027-12-24']);
+function nyParts(t) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', weekday: 'short' }).formatToParts(t).map(x => [x.type, x.value]));
+  return { date: `${p.year}-${p.month}-${p.day}`, wd: p.weekday, secs: +p.hour * 3600 + +p.minute * 60 + +p.second };
+}
+const tradingDay = d => !['Sat', 'Sun'].includes(d.wd) && !HOLIDAYS.has(d.date);
+function nextBell(now = Date.now()) {
+  // returns { open: bool, ms: ms until the next open (closed) or close (open) }
+  const today = nyParts(now), OPEN = 9.5 * 3600, CLOSE = 16 * 3600;
+  if (tradingDay(today) && today.secs >= OPEN && today.secs < CLOSE) return { open: true, ms: (CLOSE - today.secs) * 1000 };
+  let ms = tradingDay(today) && today.secs < OPEN ? (OPEN - today.secs) * 1000 : null;
+  for (let d = 1; ms === null && d < 10; d++) {
+    const midnight = now + ((86400 - today.secs) + (d - 1) * 86400) * 1000;
+    const day = nyParts(midnight + 3600_000); // safely inside that NY day, DST-proof
+    if (tradingDay(day)) ms = (86400 - today.secs + (d - 1) * 86400 + OPEN) * 1000;
+  }
+  return { open: false, ms };
+}
+const fmtDur = ms => { const s = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
+  return (d ? d + 'd ' : '') + `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`; };
+function renderClock() {
+  const m = S.markets[S.m]; if (!m) return;
+  if (m.cfg.price.source !== 0) return void ($('#mStatus').innerHTML = '<span class="up">24/7</span>');
+  const b = nextBell();
+  if (m.open) $('#mStatus').innerHTML = `<span class="up">Open</span> <span class="mut num">· closes in ${b.open ? fmtDur(b.ms) : 'a moment'}</span>`;
+  else $('#mStatus').innerHTML = `<span class="mut">Closed</span> <span class="mut num">· opens in ${b.open ? 'a moment' : fmtDur(b.ms)}</span>`;
+  $('#openIn').textContent = b.open ? 'any moment' : fmtDur(b.ms);
+}
+setInterval(renderClock, 1000);
+$('#toHx').onclick = () => { const hx = S.markets.find(x => x.cfg.price.source === 1); if (hx) { S.m = hx.id; renderAll(); loadChart(); } };
+
+function renderTable() {
+  const tab = $('#ptabs .on').dataset.t;
+  if (!S.account) return void ($('#ptable').innerHTML = '<div class="none">Connect a wallet to see positions</div>');
+  if (tab === 'positions') {
+    const rows = (S.user.positions ?? []).map(({ m, isLong, p, h }) => {
+      const size = n(p.size), entry = n(p.entryPrice), collat = n(p.collateral, 6);
+      const pnl = h ? n(h.pnlUsd ?? h[1]) : 0, equity = h ? n(h.equityUsd ?? h[0]) : collat;
+      const mark = h ? n(h.price ?? h[3]) : m.mark;
+      const keep = size * (m.cfg.maintenanceBps + m.cfg.closeFeeBps) / 1e4;
+      const liq = entry * (isLong ? 1 - (collat - keep) / size : 1 + (collat - keep) / size);
+      return `<tr><td>${m.cfg.name} <span class="${isLong ? 'up' : 'dn'}">${isLong ? 'Long' : 'Short'}</span></td>
+        <td class="r num">${fmtUsd(size)}</td><td class="r num">${fmtUsd(collat)}</td><td class="r num">${fmtPx(entry)}</td><td class="r num">${fmtPx(mark)}</td>
+        <td class="r num ${pnl >= 0 ? 'up' : 'dn'}">${pnl >= 0 ? '+' : ''}${fmtUsd(pnl)} <span class="mut">${(pnl / collat * 100).toFixed(1)}%</span></td>
+        <td class="r num">${liq > 0 ? fmtPx(liq) : '—'}</td>
+        <td class="r"><button class="mini" data-close="${m.id}:${isLong}">Close</button></td></tr>`;
+    });
+    $('#ptable').innerHTML = rows.length ? `<table><tr><th>Market</th><th class="r">Size</th><th class="r">Collateral</th><th class="r">Entry</th><th class="r">Mark</th><th class="r">PnL</th><th class="r">Liq.</th><th></th></tr>${rows.join('')}</table>` : '<div class="none">No open positions</div>';
+    $$('[data-close]').forEach(b => b.onclick = () => closePosition(...b.dataset.close.split(':')));
+  } else {
+    const rows = (S.user.orders ?? []).map(o => `<tr><td>${S.markets[o.market]?.cfg.name} <span class="${o.isLong ? 'up' : 'dn'}">${o.isIncrease ? 'Open' : 'Close'} ${o.isLong ? 'long' : 'short'}</span></td>
+      <td class="r num">${fmtUsd(n(o.sizeDelta))}</td><td class="r num">${fmtUsd(n(o.collateralDelta, 6))}</td><td class="r mut">Filling…</td>
+      <td class="r"><button class="mini" data-cancel="${o.id}">Cancel</button></td></tr>`);
+    $('#ptable').innerHTML = rows.length ? `<table><tr><th>Order</th><th class="r">Size</th><th class="r">Collateral</th><th class="r">Status</th><th></th></tr>${rows.join('')}</table>` : '<div class="none">No pending orders</div>';
+    $$('[data-cancel]').forEach(b => b.onclick = () => send(L, 'cancelOrder', [BigInt(b.dataset.cancel)], 'Cancel order'));
+  }
+}
+
+async function closePosition(id, isLongStr) {
+  const isLong = isLongStr === 'true';
+  const pos = S.user.positions.find(x => x.m.id === Number(id) && x.isLong === isLong); if (!pos) return;
+  const mark = S.markets[Number(id)].markRaw, slip = BigInt(S.slip);
+  const acceptable = isLong ? mark * (10000n - slip * 2n) / 10000n : mark * (10000n + slip * 2n) / 10000n;
+  await send(L, 'createOrder', [Number(id), isLong, false, C.usdg, 0n, pos.p.size, acceptable], 'Close position');
+}
+
+$('#submit').onclick = async () => {
+  if (!S.account) return $('#connect').click();
+  const q = quote(); if (!q?.size) return;
+  const collat = usdg(q.collat), size = parseUnits(q.size.toFixed(6), 18), slip = BigInt(S.slip);
+  if (!(await approveIfNeeded(collat))) return;
+  const mark = q.m.markRaw;
+  const acceptable = q.isLong ? mark * (10000n + slip) / 10000n : mark * (10000n - slip) / 10000n;
+  if (await send(L, 'createOrder', [q.m.id, q.isLong, true, C.usdg, collat, size, acceptable], `${q.isLong ? 'Long' : 'Short'} ${q.m.cfg.name}`)) $('#amt').value = '';
+};
+$$('.side [data-side]').forEach(b => b.onclick = () => { S.side = b.dataset.side; renderTicket(); });
+$('#amt').oninput = renderTicket; $('#lev').oninput = renderTicket;
+$('#maxBtn').onclick = () => { if (S.user.bal !== undefined) { $('#amt').value = n(S.user.bal, 6); renderTicket(); } };
+$('#slip').onclick = () => { S.slip = { 10: 50, 50: 100, 100: 10 }[S.slip]; $('#slip').textContent = (S.slip / 100) + '%'; };
+$$('#ptabs button').forEach(b => b.onclick = () => { $$('#ptabs button').forEach(x => x.classList.toggle('on', x === b)); renderTable(); });
+
+// ---------- earn ----------
+function renderEarn() {
+  const { value, tokens, oi, supply } = S.pool;
+  const price = supply ? value / supply : 1;
+  $('#eTvl').textContent = fmtUsd(value, 0);
+  $('#ePrice').textContent = fmtPx(price);
+  $('#eUtil').textContent = tokens ? (oi / tokens * 100).toFixed(1) + '%' : '0%';
+  $('#eRate').textContent = fmtTok(S.farm.lpRate * 86400);
+  const mine = S.account ? n(S.user.llp ?? 0n) : 0, share = supply ? mine / supply : 0;
+  $('#eMine').textContent = fmtUsd(mine * price);
+  $('#eLlp').textContent = fmtTok(mine, 2);
+  $('#eShare').textContent = (share * 100).toFixed(share && share < .001 ? 4 : 2) + '%';
+  $('#eDaily').textContent = fmtTok(S.farm.lpRate * 86400 * share) + ' $LASSO / day';
+  renderLpTicket();
+}
+function renderLpTicket() {
+  const dep = S.lpMode === 'deposit', supply = S.pool.supply, price = supply ? S.pool.value / supply : 1;
+  $$('[data-lp]').forEach(b => b.classList.toggle('on', b.dataset.lp === S.lpMode));
+  $('#lUnit').textContent = dep ? 'USDG' : 'LLP';
+  const bal = !S.account ? null : dep ? n(S.user.bal ?? 0n, 6) : n(S.user.llp ?? 0n);
+  $('#lBal').textContent = bal === null ? '—' : fmtTok(bal, 2);
+  const amt = Number($('#lAmt').value || 0);
+  $('#lOut').textContent = !amt ? '—' : dep ? fmtTok(amt * 0.999 / price, 2) + ' LLP' : fmtTok(amt * price * 0.999, 2) + ' USDG';
+  const btn = $('#lSubmit'); btn.className = 'cta';
+  let label = dep ? 'Deposit' : 'Withdraw', ok = true;
+  if (!live) { label = 'Launching soon'; ok = false; }
+  else if (!S.account) label = 'Connect wallet';
+  else if (!amt) { label = 'Enter an amount'; ok = false; }
+  else if (amt > bal + 1e-9) { label = dep ? 'Not enough USDG' : 'Not enough LLP'; ok = false; }
+  else if (dep && S.user.allowance < usdg(amt)) label = 'Approve USDG';
+  btn.textContent = label; btn.disabled = !ok;
+}
+$$('[data-lp]').forEach(b => b.onclick = () => { S.lpMode = b.dataset.lp; $('#lAmt').value = ''; renderLpTicket(); });
+$('#lAmt').oninput = renderLpTicket;
+$('#lMax').onclick = () => { if (!S.account) return; $('#lAmt').value = S.lpMode === 'deposit' ? n(S.user.bal, 6) : formatUnits(S.user.llp, 18); renderLpTicket(); };
+$('#lSubmit').onclick = async () => {
+  if (!S.account) return $('#connect').click();
+  const v = $('#lAmt').value; if (!Number(v)) return;
+  let ok;
+  if (S.lpMode === 'deposit') {
+    const amt = usdg(v);
+    if (!(await approveIfNeeded(amt))) return;
+    ok = await send(L, 'deposit', [C.usdg, amt], 'Deposit');
+  } else {
+    let shares = parseUnits(Number(v).toFixed(18), 18); if (shares > S.user.llp) shares = S.user.llp;
+    ok = await send(L, 'withdraw', [shares, C.usdg], 'Withdraw');
+  }
+  if (ok) $('#lAmt').value = '';
+};
+
+// ---------- farm ----------
+function renderFarm() {
+  const f = S.farm; if (!f.end) return;
+  const now = Date.now() / 1000;
+  const left = Math.max(0, f.end - now);
+  $('#fEnds').textContent = left ? `${Math.floor(left / 86400)}d ${Math.floor(left % 86400 / 3600)}h` : 'Ended';
+  $('#fEmitted').textContent = fmtCompact(f.emitted);
+  $('#fToday').textContent = fmtCompact(f.epochEmission);
+  const progress = Math.min(1, (now - f.start) / (f.end - f.start));
+  $('#fBar').style.width = (progress * 100).toFixed(1) + '%';
+  $('#fBarNote').textContent = `Season 1 · ${(progress * 100).toFixed(1)}% complete`;
+  const u = S.user;
+  $('#fMine').textContent = S.account ? fmtTok(u.claimable ?? 0, 2) : '0';
+  $('#fMineToday').textContent = S.account ? fmtTok(u.today ?? 0, 2) : '0';
+  $('#fFees').textContent = fmtUsd(u.feesToday ?? 0);
+  const share = S.pool.supply && S.account ? n(u.llp ?? 0n) / S.pool.supply : 0;
+  $('#fLpDaily').textContent = fmtTok(f.lpRate * 86400 * share) + ' / day';
+  const launched = f.lasso && f.lasso !== '0x0000000000000000000000000000000000000000';
+  const btn = $('#claim');
+  btn.textContent = !launched ? 'Claim opens at token launch' : !S.account ? 'Connect wallet' : 'Claim $LASSO';
+  btn.disabled = !launched || (S.account && !(u.claimable > 0));
+}
+$('#claim').onclick = () => S.account ? send(F, 'claim', [], 'Claim $LASSO') : $('#connect').click();
+setInterval(() => {
+  const s = 86400 - Math.floor(Date.now() / 1000) % 86400;
+  $('#fReset').textContent = `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor(s % 3600 / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+}, 1000);
+
+// ---------- chart ----------
+const ORACLE_TOPIC = '0x8444eb30a6403b8ecb33a3707560b75208a2e9ad9ae5cc1fac2a073ed9bcd774';
+const SWAP_TOPIC = '0x40e9cecb9f5f1f1c5b9c97dec2917b7ee92e57ba5563708daca94dd84ad7112f';
+const chartCache = {};
+async function history(m) {
+  if (chartCache[m.id]) return chartCache[m.id];
+  const head = await pub.getBlockNumber(), CHUNK = 200000n;
+  const oracle = m.cfg.price.source === 0;
+  const ranges = [0n, 1n, 2n, 3n].map(i => [head - CHUNK * (i + 1n) + 1n, head - CHUNK * i]);
+  const logs = (await Promise.all(ranges.map(([fromBlock, toBlock]) => pub.request({ method: 'eth_getLogs', params: [{
+    fromBlock: '0x' + fromBlock.toString(16), toBlock: '0x' + toBlock.toString(16),
+    address: oracle ? C.registry : C.poolManager,
+    topics: oracle ? [ORACLE_TOPIC, m.cfg.price.feedId] : [SWAP_TOPIC, C.hxmaxPoolId],
+  }] }).catch(() => [])))).flat();
+  const pts = logs.map(l => {
+    const d = l.data.slice(2), w = i => BigInt('0x' + d.slice(i * 64, i * 64 + 64));
+    if (oracle) return [Number(w(2)), n(w(0))];
+    const sqrt = Number(w(2)) / 2 ** 96; // hXMAX is currency1, USDG currency0
+    return [Number(BigInt(l.blockNumber)), 1e12 / (sqrt * sqrt)];
+  }).sort((a, b) => a[0] - b[0]);
+  return (chartCache[m.id] = pts);
+}
+async function loadChart() {
+  const m = S.markets[S.m]; if (!m) return;
+  const el = $('#chart');
+  let pts = await history(m);
+  if (m.mark) pts = [...pts, [pts.length ? pts.at(-1)[0] + 1 : 0, m.mark]];
+  if (pts.length < 2) return void (el.innerHTML = '<div class="empty">No recent price history</div>');
+  const step = Math.ceil(pts.length / 400); pts = pts.filter((_, i) => i % step === 0 || i === pts.length - 1);
+  const W = 1000, H = 380, pad = 24;
+  const xs = pts.map((_, i) => i / (pts.length - 1) * W);
+  const lo = Math.min(...pts.map(p => p[1])), hi = Math.max(...pts.map(p => p[1])), span = hi - lo || hi * 0.01;
+  const ys = pts.map(p => pad + (1 - (p[1] - lo) / span) * (H - pad * 2.5));
+  const line = xs.map((x, i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join('');
+  const upTrend = pts.at(-1)[1] >= pts[0][1], col = upTrend ? 'var(--up)' : 'var(--dn)';
+  const chg = (pts.at(-1)[1] / pts[0][1] - 1) * 100;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${upTrend ? '#3DD68C' : '#F2555A'}" stop-opacity=".16"/><stop offset="1" stop-color="${upTrend ? '#3DD68C' : '#F2555A'}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${line}L${W},${H}L0,${H}Z" fill="url(#g)"/>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
+    <line id="cx" y1="0" y2="${H}" stroke="#2A2A2F" vector-effect="non-scaling-stroke" visibility="hidden"/>
+  </svg><div class="hover"><span class="mut">${m.cfg.price.source === 0 ? 'Share price · Hooke oracle' : 'Token price · Hooke pool'}</span>
+  &nbsp; <span class="num ${chg >= 0 ? 'up' : 'dn'}" id="hv">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</span></div>`;
+  const svg = el.querySelector('svg'), cx = el.querySelector('#cx'), hv = el.querySelector('#hv');
+  svg.onmousemove = e => {
+    const r = svg.getBoundingClientRect(), i = Math.round((e.clientX - r.left) / r.width * (pts.length - 1));
+    cx.setAttribute('x1', xs[i]); cx.setAttribute('x2', xs[i]); cx.setAttribute('visibility', 'visible');
+    hv.textContent = fmtPx(pts[i][1]); hv.className = 'num';
+  };
+  svg.onmouseleave = () => { cx.setAttribute('visibility', 'hidden'); hv.textContent = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`; hv.className = 'num ' + (chg >= 0 ? 'up' : 'dn'); };
+}
+
+await refresh();
+loadChart();
+setInterval(refresh, 8000);
+setInterval(() => { delete chartCache[S.m]; loadChart(); }, 120000);
+</script>
+</body>
+</html>

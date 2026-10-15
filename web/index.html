@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lasso</title>
+<meta name="description" content="Perpetuals on Hooke. Every Hooke stock has two prices. Trade either, or the gap between them. Farm $LASSO.">
+<link rel="icon" href="lasso.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0B0B0C; --s1: #111113; --line: #1F1F23; --line2: #2A2A2F; --fg: #EDEBE6; --mut: #8A8880; --dim: #7D7B75; --acc: #FF7A2F; --up: #3DD68C; --dn: #F2555A; --mono: 'JetBrains Mono', ui-monospace, monospace }
+* { box-sizing: border-box; margin: 0 }
+html, body { background: var(--bg); color: var(--fg) }
+body { font: 15px/1.5 'Inter Tight', system-ui, sans-serif; -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden }
+a { color: inherit; text-decoration: none }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -.01em }
+.mut { color: var(--mut) } .up { color: var(--up) } .dn { color: var(--dn) } .acc { color: var(--acc) }
+
+header { height: 56px; display: flex; align-items: center; gap: 24px; padding: 0 20px; border-bottom: 1px solid var(--line) }
+.brand { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 19px; letter-spacing: -.04em }
+.brand img { width: 30px; height: 30px; margin: 0 -2px 0 -6px }
+.sp { flex: 1 }
+header nav { display: flex; gap: 4px; align-items: center }
+header nav a { color: var(--mut); font-weight: 500; padding: 6px 12px; border-radius: 8px }
+header nav a:hover { color: var(--fg) }
+.pill { height: 34px; padding: 0 14px; border-radius: 999px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px }
+.pill.solid { background: var(--fg); color: var(--bg) }
+.pill.solid:hover { background: #fff }
+.pill.line { border: 1px solid var(--line2) }
+.pill.line:hover { border-color: var(--mut) }
+
+main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 20px }
+.hero { padding: 84px 0 56px; position: relative }
+.glow { position: absolute; inset: -80px -200px 0; background: radial-gradient(640px 400px at 82% 45%, rgba(255,122,47,.16), transparent 70%), radial-gradient(500px 300px at 10% 0%, rgba(255,255,255,.04), transparent 70%); pointer-events: none }
+.ghost { position: absolute; right: -60px; top: -30px; width: 560px; opacity: .07; pointer-events: none; user-select: none }
+.hero > :not(.glow, .ghost) { position: relative }
+.badge { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line2); background: rgba(17,17,19,.7); border-radius: 999px; padding: 7px 16px 7px 14px; font-size: 13px; color: var(--mut); margin-bottom: 28px }
+.badge img { height: 16px; width: auto; display: block }
+.badge:hover { border-color: var(--mut) }
+.hero h1 { font-size: 64px; font-weight: 500; letter-spacing: -.045em; line-height: 1.02; max-width: 760px }
+.hero p { color: var(--mut); font-size: 18px; max-width: 560px; margin-top: 22px }
+.ctas { display: flex; gap: 10px; margin-top: 34px; flex-wrap: wrap }
+.ctas .pill { height: 44px; padding: 0 20px; font-size: 15px }
+
+.live { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line) }
+.live > div { padding: 22px 20px 22px 0 }
+.live > div + div { padding-left: 24px; border-left: 1px solid var(--line) }
+.live small { display: block; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px }
+.live b { font-size: 26px; font-weight: 500 }
+.live .row { display: flex; align-items: center; gap: 10px }
+.tok { position: relative; width: 30px; height: 30px; flex: none }
+.tok > img { width: 30px; height: 30px; border-radius: 50%; display: block }
+.tok .sub { position: absolute; right: -4px; bottom: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line2); padding: 2px }
+.tok .sub img { width: 100%; height: 100%; display: block }
+.live span { display: block; color: var(--mut); font-size: 13px; margin-top: 6px }
+
+.section { padding: 72px 0 0 }
+.section h2 { font-size: 30px; font-weight: 500; letter-spacing: -.03em; max-width: 620px }
+.section > p { color: var(--mut); max-width: 620px; margin-top: 12px; font-size: 16px }
+.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px }
+.card { background: var(--s1); border: 1px solid var(--line); border-radius: 14px; padding: 22px; transition: border-color .15s, transform .15s }
+.card:hover { border-color: var(--line2); transform: translateY(-2px) }
+.card .n { font-family: var(--mono); font-size: 12px; color: var(--acc) }
+.card b { display: block; font-weight: 500; font-size: 17px; margin: 10px 0 6px }
+.card p { color: var(--mut); font-size: 14px }
+.card a { color: var(--fg); font-size: 14px; display: inline-block; margin-top: 14px; border-bottom: 1px solid var(--line2) }
+
+.formula { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 28px; padding: 28px 22px; background: var(--s1); border: 1px solid var(--line); border-radius: 16px }
+.chip { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 10px; border: 1px solid var(--line2); border-radius: 999px; background: var(--bg); font-weight: 500 }
+.chip .tok, .chip .tok > img { width: 26px; height: 26px }
+.chip.result { border-color: rgba(255,122,47,.45); background: rgba(255,122,47,.08); padding-left: 16px }
+.op { color: var(--dim); font-family: var(--mono); font-size: 18px }
+.section > .foot { color: var(--mut); font-size: 14px; margin: 14px auto 0; text-align: center; max-width: none }
+.listing { display: flex; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap }
+.listing .chip { padding: 8px 14px 8px 8px; font-size: 14px }
+.chip.soon { color: var(--mut); border-style: dashed; padding-left: 14px }
+
+footer { border-top: 1px solid var(--line); margin-top: 96px; padding: 18px 20px; display: flex; gap: 18px; font-size: 12px; color: var(--dim); flex-wrap: wrap }
+footer a { color: var(--dim) } footer a:hover { color: var(--mut) }
+
+@media (max-width: 760px) {
+  .hero { padding: 64px 0 40px } .hero h1 { font-size: 40px } .hero p { font-size: 16px }
+  .live { grid-template-columns: 1fr } .live > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--line) }
+  .cols { grid-template-columns: 1fr }
+  .formula { flex-direction: column; gap: 8px }
+  .section { padding-top: 56px } .section h2 { font-size: 24px }
+  header nav a.hide { display: none }
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="index.html"><img src="lasso.svg" alt=""><span>lasso</span></a>
+  <div class="sp"></div>
+  <nav>
+    <a href="docs.html">Docs</a>
+    <a href="docs.html#farm" class="hide">$LASSO</a>
+    <a class="pill solid" href="app.html">Open app</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="glow"></div><img class="ghost" src="lasso.svg" alt="">
+    <a class="badge" href="https://hooke.fun" target="_blank" rel="noopener">Built on <img src="hooke-wordmark.svg" alt="Hooke"> · Robinhood Chain</a>
+    <h1>Introducing Lasso, the perp DEX built on Hooke.</h1>
+    <p>Long or short Hooke's tokenized stocks with up to 10x leverage, provide liquidity, and farm $LASSO. Every new stock Hooke lists is tradable on Lasso the moment it goes live.</p>
+    <div class="ctas">
+      <a class="pill solid" href="app.html">Open app</a>
+      <a class="pill line" href="docs.html">Read the docs</a>
+    </div>
+  </section>
+
+  <section class="live">
+    <div><small>XMAX · share price</small><div class="row"><span class="tok"><img src="xmax.png" alt=""></span><b class="num" id="share">—</b></div><span id="shareNote">Hooke oracle</span></div>
+    <div><small>hXMAX · token price</small><div class="row"><span class="tok"><img src="xmax.png" alt=""><span class="sub"><img src="hooke.svg" alt=""></span></span><b class="num" id="token">—</b></div><span>Hooke pool, 24/7</span></div>
+    <div><small>Token premium</small><b class="num" id="prem">—</b><span id="premNote">token vs share, right now</span></div>
+  </section>
+
+  <section class="section">
+    <h2>Trade the premium.</h2>
+    <p>Hooke's token can drift above or below the real share, and Hooke's dynamic tax pulls it back. On Lasso you can trade that gap directly, with no exposure to the stock itself.</p>
+    <div class="formula">
+      <span class="chip"><span class="tok"><img src="xmax.png" alt=""><span class="sub"><img src="hooke.svg" alt=""></span></span><span class="dn">Short</span> hXMAX</span>
+      <span class="op">+</span>
+      <span class="chip"><span class="tok"><img src="xmax.png" alt=""></span><span class="up">Long</span> XMAX</span>
+      <span class="op">=</span>
+      <span class="chip result">Short the premium</span>
+    </div>
+    <p class="foot">Flip both legs to go long it.</p>
+  </section>
+
+  <section class="section">
+    <h2>Every Hooke stock, as soon as it lists.</h2>
+    <p>Lasso prices straight off Hooke's oracle and pools, so each stock Hooke adds becomes two Lasso markets, the share and the token, with no new contracts.</p>
+    <div class="listing">
+      <span class="chip"><span class="tok"><img src="xmax.png" alt=""></span>XMAX <span class="mut">· live</span></span>
+      <span class="chip"><span class="tok"><img src="xmax.png" alt=""><span class="sub"><img src="hooke.svg" alt=""></span></span>hXMAX <span class="mut">· live</span></span>
+      <span class="chip soon">Next Hooke listing</span>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Three ways in.</h2>
+    <div class="cols">
+      <div class="card"><div class="n">01</div><b>Trade</b><p>Up to 10x on the share price, 5x on the token. Orders fill at the next Hooke price, so nobody trades on a stale quote. Slippage cancels and refunds instead of reverting.</p><a href="app.html#trade">Trade →</a></div>
+      <div class="card"><div class="n">02</div><b>Earn</b><p>Deposit USDG and be the house. The pool takes the other side of every trade and keeps 80% of fees plus trader losses. Withdraw any time.</p><a href="app.html#earn">Provide liquidity →</a></div>
+      <div class="card"><div class="n">03</div><b>Farm $LASSO</b><p>10,000,000 $LASSO over 30 days, tracked onchain. Liquidity earns every second. Trading earns per day, by fees paid. Claim at token launch on Hooke.</p><a href="app.html#farm">Start farming →</a></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>Lasso · perpetuals on Hooke · Robinhood Chain</span>
+  <span class="sp"></span>
+  <a href="docs.html">Docs</a>
+  <a href="https://robinhoodchain.blockscout.com/address/0xcBBe708dce939f2772B70967c1D0EB8e11b5DC27" target="_blank" rel="noopener">Contracts</a>
+  <a href="https://app.hooke.fun" target="_blank" rel="noopener">Hooke</a>
+</footer>
+
+<script src="config.js"></script>
+<script type="module">
+import { createPublicClient, http, parseAbi, formatUnits } from 'https://cdn.jsdelivr.net/npm/viem@2.21.0/+esm';
+const C = window.LASSO;
+const pub = createPublicClient({ transport: http(C.rpc) });
+const L = { address: C.lasso, abi: parseAbi(['function markPrice(uint16) view returns (uint256,bool)']) };
+const A = { address: C.adapter, abi: parseAbi(['function hookeState(address) view returns (uint256,uint256,int256,uint256,uint256,bool)']) };
+const px = v => '$' + Number(formatUnits(v, 18)).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+async function tick() {
+  try {
+    const [[share, open], [token], h] = await Promise.all([
+      pub.readContract({ ...L, functionName: 'markPrice', args: [0] }),
+      pub.readContract({ ...L, functionName: 'markPrice', args: [1] }),
+      pub.readContract({ ...A, functionName: 'hookeState', args: [C.feeHook] }),
+    ]);
+    document.getElementById('share').textContent = px(share);
+    document.getElementById('shareNote').textContent = open ? 'Hooke oracle · market open' : 'Hooke oracle · market closed';
+    document.getElementById('token').textContent = px(token);
+    const dev = Number(formatUnits(h[2], 16)), el = document.getElementById('prem');
+    el.textContent = (dev >= 0 ? '+' : '') + dev.toFixed(2) + '%'; el.className = 'num ' + (dev >= 0 ? 'up' : 'dn');
+    document.getElementById('premNote').textContent = `Hooke tax ${(Number(h[3]) / 1e4).toFixed(1)}% buy · ${(Number(h[4]) / 1e4).toFixed(1)}% sell`;
+  } catch {}
+}
+tick(); setInterval(tick, 10000);
+</script>
+</body>
+</html>

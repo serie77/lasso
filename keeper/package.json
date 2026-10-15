@@ -1,0 +1,14 @@
+{
+  "name": "lasso-keeper",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "node keeper.mjs",
+    "e2e": "node e2e.mjs",
+    "proxy": "node rpc-proxy.mjs"
+  },
+  "dependencies": {
+    "viem": "2.21.0"
+  }
+}

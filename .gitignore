@@ -1,0 +1,21 @@
+# secrets
+.env
+.env.*
+!.env.example
+web/config.js
+
+# build
+out/
+cache/
+broadcast/
+node_modules/
+
+# local tool state
+.impeccable/
+.vscode/
+.idea/
+
+# os / logs
+.DS_Store
+Thumbs.db
+*.log
