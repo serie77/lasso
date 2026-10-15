@@ -5,10 +5,12 @@
   "version": "0.1.0",
   "scripts": {
     "start": "node keeper.mjs",
-    "e2e": "node e2e.mjs",
-    "proxy": "node rpc-proxy.mjs"
+    "e2e": "node e2e.mjs"
   },
   "dependencies": {
     "viem": "2.21.0"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

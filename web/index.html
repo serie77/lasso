@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lasso</title>
-<meta name="description" content="Perpetuals on Hooke. Every Hooke stock has two prices. Trade either, or the gap between them. Farm $LASSO.">
-<link rel="icon" href="lasso.svg" type="image/svg+xml">
+<title>lasso</title>
+<meta name="description" content="perpetuals on hooke. every hooke stock has two prices. trade either, or the gap between them. farm $lasso.">
+<link rel="icon" href="/lasso.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -33,7 +33,7 @@ header nav a:hover { color: var(--fg) }
 
 main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 20px }
 .hero { padding: 84px 0 56px; position: relative }
-.glow { position: absolute; inset: -80px -200px 0; background: radial-gradient(640px 400px at 82% 45%, rgba(255,122,47,.16), transparent 70%), radial-gradient(500px 300px at 10% 0%, rgba(255,255,255,.04), transparent 70%); pointer-events: none }
+.glow { position: absolute; top: 0; bottom: -120px; left: 50%; width: 100vw; transform: translateX(-50%); background: radial-gradient(680px 420px at calc(50% + 330px) 42%, rgba(255,122,47,.16), transparent 70%), radial-gradient(700px 360px at calc(50% - 380px) 0%, rgba(255,255,255,.035), transparent 70%); -webkit-mask-image: linear-gradient(#000 65%, transparent); mask-image: linear-gradient(#000 65%, transparent); pointer-events: none }
 .ghost { position: absolute; right: -60px; top: -30px; width: 560px; opacity: .07; pointer-events: none; user-select: none }
 .hero > :not(.glow, .ghost) { position: relative }
 .badge { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line2); background: rgba(17,17,19,.7); border-radius: 999px; padding: 7px 16px 7px 14px; font-size: 13px; color: var(--mut); margin-bottom: 28px }
@@ -47,7 +47,7 @@ main { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 20px 
 .live { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line) }
 .live > div { padding: 22px 20px 22px 0 }
 .live > div + div { padding-left: 24px; border-left: 1px solid var(--line) }
-.live small { display: block; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px }
+.live small { display: block; color: var(--dim); font-size: 11px; letter-spacing: .08em; margin-bottom: 8px }
 .live b { font-size: 26px; font-weight: 500 }
 .live .row { display: flex; align-items: center; gap: 10px }
 .tok { position: relative; width: 30px; height: 30px; flex: none }
@@ -92,75 +92,75 @@ footer a { color: var(--dim) } footer a:hover { color: var(--mut) }
 </head>
 <body>
 <header>
-  <a class="brand" href="index.html"><img src="lasso.svg" alt=""><span>lasso</span></a>
+  <a class="brand" href="/"><img src="/lasso.svg" alt=""><span>lasso</span></a>
   <div class="sp"></div>
   <nav>
-    <a href="docs.html">Docs</a>
-    <a href="docs.html#farm" class="hide">$LASSO</a>
-    <a class="pill solid" href="app.html">Open app</a>
+    <a href="/docs">docs</a>
+    <a href="/farm" class="hide">$lasso</a>
+    <a class="pill solid" href="/trade">open app</a>
   </nav>
 </header>
 
 <main>
   <section class="hero">
-    <div class="glow"></div><img class="ghost" src="lasso.svg" alt="">
-    <a class="badge" href="https://hooke.fun" target="_blank" rel="noopener">Built on <img src="hooke-wordmark.svg" alt="Hooke"> · Robinhood Chain</a>
-    <h1>Introducing Lasso, the perp DEX built on Hooke.</h1>
-    <p>Long or short Hooke's tokenized stocks with up to 10x leverage, provide liquidity, and farm $LASSO. Every new stock Hooke lists is tradable on Lasso the moment it goes live.</p>
+    <div class="glow"></div><img class="ghost" src="/lasso.svg" alt="">
+    <a class="badge" href="https://hooke.fun" target="_blank" rel="noopener">built on <img src="/hooke-wordmark.svg" alt="hooke"> · robinhood chain</a>
+    <h1>introducing lasso, the perp dex built on hooke.</h1>
+    <p>long or short hooke's tokenized stocks with up to 10x leverage, provide liquidity, and farm $lasso. every new stock hooke lists is tradable on lasso the moment it goes live.</p>
     <div class="ctas">
-      <a class="pill solid" href="app.html">Open app</a>
-      <a class="pill line" href="docs.html">Read the docs</a>
+      <a class="pill solid" href="/trade">open app</a>
+      <a class="pill line" href="/docs">read the docs</a>
     </div>
   </section>
 
   <section class="live">
-    <div><small>XMAX · share price</small><div class="row"><span class="tok"><img src="xmax.png" alt=""></span><b class="num" id="share">—</b></div><span id="shareNote">Hooke oracle</span></div>
-    <div><small>hXMAX · token price</small><div class="row"><span class="tok"><img src="xmax.png" alt=""><span class="sub"><img src="hooke.svg" alt=""></span></span><b class="num" id="token">—</b></div><span>Hooke pool, 24/7</span></div>
-    <div><small>Token premium</small><b class="num" id="prem">—</b><span id="premNote">token vs share, right now</span></div>
+    <div><small>XMAX · share price</small><div class="row"><span class="tok"><img src="/xmax.png" alt=""></span><b class="num" id="share">—</b></div><span id="shareNote">hooke oracle</span></div>
+    <div><small>hXMAX · token price</small><div class="row"><span class="tok"><img src="/xmax.png" alt=""><span class="sub"><img src="/hooke.svg" alt=""></span></span><b class="num" id="token">—</b></div><span>hooke pool, 24/7</span></div>
+    <div><small>token premium</small><b class="num" id="prem">—</b><span id="premNote">token vs share, right now</span></div>
   </section>
 
   <section class="section">
-    <h2>Trade the premium.</h2>
-    <p>Hooke's token can drift above or below the real share, and Hooke's dynamic tax pulls it back. On Lasso you can trade that gap directly, with no exposure to the stock itself.</p>
+    <h2>trade the premium.</h2>
+    <p>hooke's token can drift above or below the real share, and hooke's dynamic tax pulls it back. on lasso you can trade that gap directly, with no exposure to the stock itself.</p>
     <div class="formula">
-      <span class="chip"><span class="tok"><img src="xmax.png" alt=""><span class="sub"><img src="hooke.svg" alt=""></span></span><span class="dn">Short</span> hXMAX</span>
+      <span class="chip"><span class="tok"><img src="/xmax.png" alt=""><span class="sub"><img src="/hooke.svg" alt=""></span></span><span class="dn">short</span> hXMAX</span>
       <span class="op">+</span>
-      <span class="chip"><span class="tok"><img src="xmax.png" alt=""></span><span class="up">Long</span> XMAX</span>
+      <span class="chip"><span class="tok"><img src="/xmax.png" alt=""></span><span class="up">long</span> XMAX</span>
       <span class="op">=</span>
-      <span class="chip result">Short the premium</span>
+      <span class="chip result">short the premium</span>
     </div>
-    <p class="foot">Flip both legs to go long it.</p>
+    <p class="foot">flip both legs to go long it.</p>
   </section>
 
   <section class="section">
-    <h2>Every Hooke stock, as soon as it lists.</h2>
-    <p>Lasso prices straight off Hooke's oracle and pools, so each stock Hooke adds becomes two Lasso markets, the share and the token, with no new contracts.</p>
+    <h2>every hooke stock, as soon as it lists.</h2>
+    <p>lasso prices straight off hooke's oracle and pools, so each stock hooke adds becomes two lasso markets, the share and the token, with no new contracts.</p>
     <div class="listing">
-      <span class="chip"><span class="tok"><img src="xmax.png" alt=""></span>XMAX <span class="mut">· live</span></span>
-      <span class="chip"><span class="tok"><img src="xmax.png" alt=""><span class="sub"><img src="hooke.svg" alt=""></span></span>hXMAX <span class="mut">· live</span></span>
-      <span class="chip soon">Next Hooke listing</span>
+      <span class="chip"><span class="tok"><img src="/xmax.png" alt=""></span>XMAX <span class="mut">· live</span></span>
+      <span class="chip"><span class="tok"><img src="/xmax.png" alt=""><span class="sub"><img src="/hooke.svg" alt=""></span></span>hXMAX <span class="mut">· live</span></span>
+      <span class="chip soon">next hooke listing</span>
     </div>
   </section>
 
   <section class="section">
-    <h2>Three ways in.</h2>
+    <h2>three ways in.</h2>
     <div class="cols">
-      <div class="card"><div class="n">01</div><b>Trade</b><p>Up to 10x on the share price, 5x on the token. Orders fill at the next Hooke price, so nobody trades on a stale quote. Slippage cancels and refunds instead of reverting.</p><a href="app.html#trade">Trade →</a></div>
-      <div class="card"><div class="n">02</div><b>Earn</b><p>Deposit USDG and be the house. The pool takes the other side of every trade and keeps 80% of fees plus trader losses. Withdraw any time.</p><a href="app.html#earn">Provide liquidity →</a></div>
-      <div class="card"><div class="n">03</div><b>Farm $LASSO</b><p>10,000,000 $LASSO over 30 days, tracked onchain. Liquidity earns every second. Trading earns per day, by fees paid. Claim at token launch on Hooke.</p><a href="app.html#farm">Start farming →</a></div>
+      <div class="card"><div class="n">01</div><b>trade</b><p>up to 10x on the share price, 5x on the token. orders fill at the next hooke price, so nobody trades on a stale quote. slippage cancels and refunds instead of reverting.</p><a href="/trade">trade →</a></div>
+      <div class="card"><div class="n">02</div><b>earn</b><p>deposit USDG and be the house. the pool takes the other side of every trade and keeps 80% of fees plus trader losses. withdraw any time.</p><a href="/earn">provide liquidity →</a></div>
+      <div class="card"><div class="n">03</div><b>farm $lasso</b><p>10,000,000 $lasso over 30 days, tracked onchain. liquidity earns every second. trading earns per day, by fees paid. claim at token launch on hooke.</p><a href="/farm">start farming →</a></div>
     </div>
   </section>
 </main>
 
 <footer>
-  <span>Lasso · perpetuals on Hooke · Robinhood Chain</span>
+  <span>lasso · perpetuals on hooke · robinhood chain</span>
   <span class="sp"></span>
-  <a href="docs.html">Docs</a>
-  <a href="https://robinhoodchain.blockscout.com/address/0xcBBe708dce939f2772B70967c1D0EB8e11b5DC27" target="_blank" rel="noopener">Contracts</a>
-  <a href="https://app.hooke.fun" target="_blank" rel="noopener">Hooke</a>
+  <a href="/docs">docs</a>
+  <a href="https://robinhoodchain.blockscout.com/address/0xcBBe708dce939f2772B70967c1D0EB8e11b5DC27" target="_blank" rel="noopener">contracts</a>
+  <a href="https://app.hooke.fun" target="_blank" rel="noopener">hooke</a>
 </footer>
 
-<script src="config.js"></script>
+<script src="/config.js"></script>
 <script type="module">
 import { createPublicClient, http, parseAbi, formatUnits } from 'https://cdn.jsdelivr.net/npm/viem@2.21.0/+esm';
 const C = window.LASSO;
@@ -176,11 +176,11 @@ async function tick() {
       pub.readContract({ ...A, functionName: 'hookeState', args: [C.feeHook] }),
     ]);
     document.getElementById('share').textContent = px(share);
-    document.getElementById('shareNote').textContent = open ? 'Hooke oracle · market open' : 'Hooke oracle · market closed';
+    document.getElementById('shareNote').textContent = open ? 'hooke oracle · market open' : 'hooke oracle · market closed';
     document.getElementById('token').textContent = px(token);
     const dev = Number(formatUnits(h[2], 16)), el = document.getElementById('prem');
     el.textContent = (dev >= 0 ? '+' : '') + dev.toFixed(2) + '%'; el.className = 'num ' + (dev >= 0 ? 'up' : 'dn');
-    document.getElementById('premNote').textContent = `Hooke tax ${(Number(h[3]) / 1e4).toFixed(1)}% buy · ${(Number(h[4]) / 1e4).toFixed(1)}% sell`;
+    document.getElementById('premNote').textContent = `hooke tax ${(Number(h[3]) / 1e4).toFixed(1)}% buy · ${(Number(h[4]) / 1e4).toFixed(1)}% sell`;
   } catch {}
 }
 tick(); setInterval(tick, 10000);

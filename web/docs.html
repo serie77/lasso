@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lasso · Docs</title>
-<meta name="description" content="How Lasso works: Hooke's two prices, markets, orders, fees, liquidation, the LLP pool, $LASSO farming math, risks and contracts.">
-<link rel="icon" href="lasso.svg" type="image/svg+xml">
+<title>lasso · docs</title>
+<meta name="description" content="how lasso works: hooke's two prices, markets, orders, fees, liquidation, the LLP pool, $lasso farming math, risks and contracts.">
+<link rel="icon" href="/lasso.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@ header nav a:hover { color: var(--fg) }
 .wrap { flex: 1; width: 100%; max-width: 1080px; margin: 0 auto; padding: 40px 20px; display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 56px }
 aside { position: sticky; top: 76px; align-self: start; display: flex; flex-direction: column; gap: 2px; font-size: 13px }
 aside a { color: var(--mut); padding: 5px 0 } aside a:hover { color: var(--fg) }
-aside .h { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin: 14px 0 4px } aside .h:first-child { margin-top: 0 }
+aside .h { color: var(--dim); font-size: 11px; letter-spacing: .08em; margin: 14px 0 4px } aside .h:first-child { margin-top: 0 }
 
 article { max-width: 680px }
 article h1 { font-size: 40px; font-weight: 500; letter-spacing: -.04em; line-height: 1.1 }
@@ -59,170 +59,178 @@ footer a { color: var(--dim) } footer a:hover { color: var(--mut) }
 </head>
 <body>
 <header>
-  <a class="brand" href="index.html"><img src="lasso.svg" alt=""><span>lasso</span></a>
+  <a class="brand" href="/"><img src="/lasso.svg" alt=""><span>lasso</span></a>
   <div class="sp"></div>
-  <nav><a href="docs.html">Docs</a><a class="pill" href="app.html">Open app</a></nav>
+  <nav><a href="/docs">docs</a><a class="pill" href="/trade">open app</a></nav>
 </header>
 
 <div class="wrap">
 <aside>
-  <div class="h">Protocol</div>
-  <a href="#hooke">Hooke's two prices</a>
-  <a href="#markets">Markets</a>
-  <a href="#premium">The premium trade</a>
-  <div class="h">Trading</div>
-  <a href="#orders">Orders</a>
-  <a href="#fees">Fees</a>
-  <a href="#liquidation">Liquidation</a>
-  <div class="h">Liquidity</div>
-  <a href="#llp">The LLP pool</a>
-  <div class="h">$LASSO</div>
-  <a href="#farm">Farming</a>
-  <a href="#farm-math">The math</a>
-  <div class="h">Reference</div>
-  <a href="#memes">Other Hooke tokens</a>
-  <a href="#risks">Risks</a>
-  <a href="#contracts">Contracts</a>
+  <div class="h">protocol</div>
+  <a href="#hooke">hooke's two prices</a>
+  <a href="#markets">markets</a>
+  <a href="#premium">the premium trade</a>
+  <div class="h">trading</div>
+  <a href="#orders">orders</a>
+  <a href="#fees">fees</a>
+  <a href="#liquidation">liquidation</a>
+  <div class="h">liquidity</div>
+  <a href="#llp">the LLP pool</a>
+  <div class="h">$lasso</div>
+  <a href="#farm">farming</a>
+  <a href="#farm-math">the math</a>
+  <div class="h">reference</div>
+  <a href="#memes">other hooke tokens</a>
+  <a href="#risks">risks</a>
+  <a href="#contracts">contracts</a>
 </aside>
 
 <article>
-  <h1>Lasso docs</h1>
-  <p class="lede">Lasso is a perpetuals exchange built on Hooke's tokenized stocks on Robinhood Chain. This page is the whole protocol: how prices come from Hooke, how trades and the pool work, and exactly how $LASSO is earned.</p>
+  <h1>lasso docs</h1>
+  <p class="lede">lasso is a perpetuals exchange built on hooke's tokenized stocks on robinhood chain. this page is the whole protocol: how prices come from hooke, how trades and the pool work, and exactly how $lasso is earned.</p>
 
-  <h2 id="hooke">Hooke's two prices</h2>
-  <p>Hooke puts stocks onchain in a way that no other venue does: every stock gets <em>two</em> prices that are allowed to disagree.</p>
+  <h2 id="hooke">hooke's two prices</h2>
+  <p>hooke puts stocks onchain in a way that no other venue does: every stock gets <em>two</em> prices that are allowed to disagree.</p>
   <ul>
-    <li><strong>The share price.</strong> Hooke's oracle registry publishes the real stock price every few seconds while the market is open, with a <code>marketOpen</code> flag and an expiry. For XMAX this is what the share trades at.</li>
-    <li><strong>The token price.</strong> The onchain token (hXMAX) trades against USDG in a Uniswap v4 pool, 24/7. Its price is set by buyers and sellers, so it floats above or below the share.</li>
+    <li><strong>the share price.</strong> hooke's oracle registry publishes the real stock price every few seconds while the market is open, with a <code>marketOpen</code> flag and an expiry. for XMAX this is what the share trades at.</li>
+    <li><strong>the token price.</strong> the onchain token (hXMAX) trades against USDG in a uniswap v4 pool, 24/7. its price is set by buyers and sellers, so it floats above or below the share.</li>
   </ul>
-  <p>What keeps them close is Hooke's fee hook: a <strong>dynamic tax</strong> on every swap. Trades that push the pool price <em>toward</em> the oracle price pay the base rate; trades that push it <em>away</em> pay more, rising with the deviation. The token can run at a premium, but it costs more and more to keep it there.</p>
-  <p>That gap, the <strong>token premium</strong>, is the thing Lasso is built around. Hooke also launches memecoins that trade against hXMAX, so meme holders carry XMAX exposure whether they want it or not (see <a href="#memes">other Hooke tokens</a>).</p>
+  <p>what keeps them close is hooke's fee hook: a <strong>dynamic tax</strong> on every swap. trades that push the pool price <em>toward</em> the oracle price pay the base rate; trades that push it <em>away</em> pay more, rising with the deviation. the token can run at a premium, but it costs more and more to keep it there.</p>
+  <p>that gap, the <strong>token premium</strong>, is the thing lasso is built around. hooke also launches memecoins that trade against hXMAX, so meme holders carry XMAX exposure whether they want it or not (see <a href="#memes">other hooke tokens</a>).</p>
 
-  <h2 id="markets">Markets</h2>
-  <p>Each Hooke stock becomes two Lasso markets. Both settle in USDG; profit and loss are paid from the same pool.</p>
+  <h2 id="markets">markets</h2>
+  <p>each hooke stock becomes two lasso markets. both settle in USDG; profit and loss are paid from the same pool.</p>
   <table>
-    <tr><th>Market</th><th>Priced off</th><th>Trades</th><th>Max leverage</th><th>Maintenance</th></tr>
-    <tr><td>XMAX</td><td>Hooke oracle, the real share</td><td>While the stock market is open. Closes always fill.</td><td>10x</td><td>1% of size</td></tr>
-    <tr><td>hXMAX</td><td>Hooke pool: spot vs Hooke's 30-min TWAP, whichever is worse for you</td><td>24/7</td><td>5x</td><td>2% of size</td></tr>
+    <tr><th>market</th><th>priced off</th><th>trades</th><th>max leverage</th><th>maintenance</th></tr>
+    <tr><td>XMAX</td><td>hooke oracle, the real share</td><td>while the stock market is open. closes always fill.</td><td>10x</td><td>1% of size</td></tr>
+    <tr><td>hXMAX</td><td>hooke pool: spot vs hooke's 30-min TWAP, whichever is worse for you</td><td>24/7</td><td>5x</td><td>2% of size</td></tr>
   </table>
-  <p><strong>XMAX</strong> is leveraged exposure to the stock itself. It follows the real share price, so it opens with the US stock market (9:30 to 16:00 New York time, weekdays). Outside those hours you can still close at any time, at a 0.5% spread, so you are never trapped over a weekend.</p>
-  <h3>Why XMAX doesn't open new positions after hours</h3>
-  <p>When the stock market closes, the share price stops moving and Hooke's oracle keeps reporting the last close until the next open. News doesn't wait for the bell: earnings, filings and headlines land overnight. If Lasso let you open XMAX positions against that frozen price, anyone could read the news, open at yesterday's close, and collect the gap from LPs at the open. That isn't trading, so new XMAX risk waits for the bell. Every perp on a real stock works this way.</p>
-  <p><strong>hXMAX is the 24/7 market.</strong> Hooke's token keeps trading in its pool overnight and reacts to news first, and Lasso's hXMAX market follows it. When the share is closed, the app points you there, with a live countdown to the next open.</p>
-  <p><strong>hXMAX</strong> is exposure to the token. Opening a long or closing a short uses the higher of spot and TWAP; opening a short or closing a long uses the lower. A quick spike in the pool therefore cannot be sold into Lasso for 30 minutes, which is what makes a pool-priced perp safe to run.</p>
+  <p><strong>XMAX</strong> is leveraged exposure to the stock itself. it follows the real share price, so it opens with the us stock market (9:30 to 16:00 new york time, weekdays). outside those hours you can still close at any time, at a 0.5% spread, so you are never trapped over a weekend.</p>
+  <h3>why XMAX doesn't open new positions after hours</h3>
+  <p>when the stock market closes, the share price stops moving and hooke's oracle keeps reporting the last close until the next open. news doesn't wait for the bell: earnings, filings and headlines land overnight. if lasso let you open XMAX positions against that frozen price, anyone could read the news, open at yesterday's close, and collect the gap from lps at the open. that isn't trading, so new XMAX risk waits for the bell. every perp on a real stock works this way.</p>
+  <p><strong>hXMAX is the 24/7 market.</strong> hooke's token keeps trading in its pool overnight and reacts to news first, and lasso's hXMAX market follows it. when the share is closed, the app points you there, with a live countdown to the next open.</p>
+  <p><strong>hXMAX</strong> is exposure to the token. opening a long or closing a short uses the higher of spot and TWAP; opening a short or closing a long uses the lower. a quick spike in the pool therefore cannot be sold into lasso for 30 minutes, which is what makes a pool-priced perp safe to run.</p>
 
-  <h2 id="premium">The premium trade</h2>
-  <p>Short hXMAX and long XMAX in the same size, and the stock cancels out. What is left is a short on the premium: you profit when the token falls back toward the share, which is exactly the direction Hooke's tax pushes it. Flip both legs to go long the premium.</p>
+  <h2 id="premium">the premium trade</h2>
+  <p>short hXMAX and long XMAX in the same size, and the stock cancels out. what is left is a short on the premium: you profit when the token falls back toward the share, which is exactly the direction hooke's tax pushes it. flip both legs to go long the premium.</p>
   <div class="eq">premium  = token / share − 1
 short premium = short hXMAX + long XMAX   (same USD size)
 long premium  = long hXMAX  + short XMAX</div>
-  <p>Two notes. The XMAX leg only opens while the stock market is open, so put it on during market hours. And each leg pays its own fees, so the premium has to move more than the round trip (about 0.4% to 1.4% depending on skew, see <a href="#fees">fees</a>) for the trade to pay.</p>
+  <p>two notes. the XMAX leg only opens while the stock market is open, so put it on during market hours. and each leg pays its own fees, so the premium has to move more than the round trip (about 0.4% to 1.4% depending on skew, see <a href="#fees">fees</a>) for the trade to pay.</p>
 
-  <h2 id="orders">Orders</h2>
-  <p>Lasso never fills against a price that existed when you clicked. Every order is two steps:</p>
+  <h2 id="orders">orders</h2>
+  <p>lasso never fills against a price that existed when you clicked. every order is two steps:</p>
   <ul>
-    <li>You place the order. Your collateral is escrowed in the contract.</li>
-    <li>A keeper executes it at the first price that qualifies: for XMAX, the first oracle price <em>published after</em> your order; for hXMAX, any time from 2 seconds later, at the spot/TWAP rule above.</li>
+    <li>you place the order. your collateral is escrowed in the contract.</li>
+    <li>a keeper executes it at the first price that qualifies: for XMAX, the first oracle price <em>published after</em> your order; for hXMAX, any time from 2 seconds later, at the spot/TWAP rule above.</li>
   </ul>
-  <p>You set an <strong>acceptable price</strong> (the app derives it from your slippage setting). If the execution price is worse, or the market is closed, or a limit is hit, the order is <strong>cancelled and your collateral refunded</strong> instead of reverting. You can cancel a pending order yourself at any time; after 5 minutes anyone can cancel it and the collateral still goes back to you.</p>
-  <p>Position sizing: collateral is in USDG, size is in USD. Minimum collateral after fees is $5. One position per market per side per wallet; opening again adds to it at a blended entry price.</p>
+  <p>you set an <strong>acceptable price</strong> (the app derives it from your slippage setting). if the execution price is worse, or the market is closed, or a limit is hit, the order is <strong>cancelled and your collateral refunded</strong> instead of reverting. you can cancel a pending order yourself at any time; after 5 minutes anyone can cancel it and the collateral still goes back to you.</p>
+  <p>position sizing: collateral is in USDG, size is in USD. minimum collateral after fees is $5. one position per market per side per wallet; opening again adds to it at a blended entry price.</p>
 
-  <h2 id="fees">Fees</h2>
+  <h2 id="fees">fees</h2>
   <table>
-    <tr><th>Fee</th><th>Rate</th><th>Paid</th></tr>
-    <tr><td>Open</td><td>0.10% of size</td><td>On open, from collateral</td></tr>
-    <tr><td>Tension</td><td>0% to 0.50% of size, scales with the skew your trade creates</td><td>On open</td></tr>
-    <tr><td>Close</td><td>0.10% of size</td><td>On close or liquidation</td></tr>
-    <tr><td>Borrow</td><td>Up to 100% APR on size, times pool utilisation</td><td>Accrues; settled whenever the position changes</td></tr>
-    <tr><td>Closed-market spread</td><td>0.50% against you</td><td>Only on XMAX closes while the market is closed</td></tr>
-    <tr><td>LLP deposit / withdraw</td><td>0.10%</td><td>Stays in the pool</td></tr>
+    <tr><th>fee</th><th>rate</th><th>paid</th></tr>
+    <tr><td>open</td><td>0.10% of size</td><td>on open, from collateral</td></tr>
+    <tr><td>tension</td><td>0% to 0.50% of size, scales with the skew your trade creates</td><td>on open</td></tr>
+    <tr><td>close</td><td>0.10% of size</td><td>on close or liquidation</td></tr>
+    <tr><td>borrow</td><td>up to 100% APR on size, times pool utilisation</td><td>accrues; settled whenever the position changes</td></tr>
+    <tr><td>closed-market spread</td><td>0.50% against you</td><td>only on XMAX closes while the market is closed</td></tr>
+    <tr><td>LLP deposit / withdraw</td><td>0.10%</td><td>stays in the pool</td></tr>
   </table>
-  <h3>The tension fee</h3>
-  <p>The pool is the counterparty, so one-sided open interest is risk for LPs. Lasso prices that risk the way Hooke prices deviation from the oracle: a trade that pulls long and short open interest <em>toward</em> balance pays only the base fee; a trade that makes the heavy side heavier pays extra, linear in the skew after the trade.</p>
+  <h3>the tension fee</h3>
+  <p>the pool is the counterparty, so one-sided open interest is risk for lps. lasso prices that risk the way hooke prices deviation from the oracle: a trade that pulls long and short open interest <em>toward</em> balance pays only the base fee; a trade that makes the heavy side heavier pays extra, linear in the skew after the trade.</p>
   <div class="eq">skew    = (heavy − light) / (heavy + light)   after your trade, 0 if you reduce skew
 tension = 0.50% × skew</div>
-  <p>First long into an empty market: skew 100%, you pay 0.10% + 0.50%. A short that brings it to balance: 0.10%. The app shows the exact rate before you submit.</p>
-  <h3>Where fees go</h3>
-  <p>80% of every fee goes to the LLP pool; 20% goes to the treasury. Every dollar you pay in fees also counts toward <a href="#farm">$LASSO trading rewards</a>.</p>
+  <p>first long into an empty market: skew 100%, you pay 0.10% + 0.50%. a short that brings it to balance: 0.10%. the app shows the exact rate before you submit.</p>
+  <h3>where fees go</h3>
+  <p>80% of every fee goes to the LLP pool; 20% goes to the treasury. every dollar you pay in fees also counts toward <a href="#farm">$lasso trading rewards</a>.</p>
 
-  <h2 id="liquidation">Liquidation</h2>
-  <p>A position can be liquidated when its equity, at the trader-worst price, falls below the maintenance level:</p>
-  <div class="eq">equity = collateral + unrealised PnL − close fee − unpaid borrow fee
+  <h2 id="liquidation">liquidation</h2>
+  <p>a position can be liquidated when its equity, at the trader-worst price, falls below the maintenance level:</p>
+  <div class="eq">equity = collateral + unrealised pnl − close fee − unpaid borrow fee
 liquidatable when equity &lt; maintenance × size   (1% XMAX, 2% hXMAX)</div>
-  <p>Anyone can call it. The liquidator receives $1 from whatever equity is left; <strong>everything else goes to the pool</strong>. There is no partial liquidation and no refund of leftover collateral in v1, so treat the liquidation price in the app as a hard line and close before it.</p>
+  <p>anyone can call it. the liquidator receives $1 from whatever equity is left; <strong>everything else goes to the pool</strong>. there is no partial liquidation and no refund of leftover collateral in v1, so treat the liquidation price in the app as a hard line and close before it.</p>
 
-  <h2 id="llp">The LLP pool</h2>
-  <p>Depositing USDG mints <strong>LLP</strong>. The pool is the house: it takes the other side of every position, keeps 80% of fees and 100% of trader losses, and pays trader profits.</p>
+  <h2 id="llp">the LLP pool</h2>
+  <p>depositing USDG mints <strong>LLP</strong>. the pool is the house: it takes the other side of every position, keeps 80% of fees and 100% of trader losses, and pays trader profits.</p>
   <ul>
-    <li><strong>LLP price</strong> = pool value / LLP supply. Pool value is the USDG held minus what open positions are currently up (at mid price), so unrealised trader profit is already reflected in the price you deposit or withdraw at.</li>
-    <li><strong>Withdraw any time</strong>, as long as total open interest stays covered by the pool. The 0.10% in/out fee stays in the pool for the LPs who remain.</li>
-    <li><strong>Open interest is capped</strong> per side per market ($1M XMAX, $100k hXMAX) and in total by the pool size, so the pool can never be on the hook for more than it holds.</li>
-    <li>Holding LLP earns <a href="#farm">$LASSO</a> every second. No staking.</li>
+    <li><strong>LLP price</strong> = pool value / LLP supply. pool value is the USDG held minus what open positions are currently up (at mid price), so unrealised trader profit is already reflected in the price you deposit or withdraw at.</li>
+    <li><strong>withdraw any time</strong>, as long as total open interest stays covered by the pool. the 0.10% in/out fee stays in the pool for the lps who remain.</li>
+    <li><strong>open interest is capped</strong> per side per market ($1m XMAX, $100k hXMAX) and in total by the pool size, so the pool can never be on the hook for more than it holds.</li>
+    <li>holding LLP earns <a href="#farm">$lasso</a> every second. no staking.</li>
   </ul>
 
-  <h2 id="farm">$LASSO farming</h2>
-  <p>$LASSO is Lasso's token. It launches later on Hooke. Until then, the farm contract tracks what each wallet has earned onchain, as 1:1 claims on the token. <strong>Season 1 is 10,000,000 $LASSO over 30 days</strong>, from launch day, in two streams:</p>
+  <h2 id="farm">$lasso farming</h2>
+  <p>$lasso is lasso's token. it launches later on hooke. until then, the farm contract tracks what each wallet has earned onchain, as 1:1 claims on the token. <strong>season 1 is 10,000,000 $lasso over 30 days</strong>, from launch day, in two streams:</p>
   <table>
-    <tr><th>Stream</th><th>Season total</th><th>Rate</th><th>Who earns</th></tr>
-    <tr><td>Liquidity</td><td>6,000,000</td><td>2.3148 / second (200,000 / day)</td><td>Every LLP holder, pro-rata, every second</td></tr>
-    <tr><td>Trading</td><td>4,000,000</td><td>1.5432 / second (133,333 / day)</td><td>Traders, per UTC day, by share of fees paid</td></tr>
+    <tr><th>stream</th><th>season total</th><th>rate</th><th>who earns</th></tr>
+    <tr><td>liquidity</td><td>6,000,000</td><td>2.3148 / second (200,000 / day)</td><td>every LLP holder, pro-rata, every second</td></tr>
+    <tr><td>trading</td><td>4,000,000</td><td>1.5432 / second (133,333 / day)</td><td>traders, per UTC day, by share of fees paid</td></tr>
   </table>
-  <p><strong>Liquidity</strong> needs nothing from you beyond holding LLP. The LP token reports every mint, burn and transfer to the farm, so a transfer carries only future rewards and whatever you earned stays yours.</p>
-  <p><strong>Trading</strong> is grouped into UTC days. Each day has a fixed emission; at the end of the day it is split among that day's traders in proportion to the USD fees they paid (open, tension, close and borrow fees on both markets). Your share is an estimate while the day runs and becomes final and claimable at 00:00 UTC. Because every point is bought with fees that go to the pool, farming by wash-trading costs real money.</p>
+  <p><strong>liquidity</strong> needs nothing from you beyond holding LLP. the lp token reports every mint, burn and transfer to the farm, so a transfer carries only future rewards and whatever you earned stays yours.</p>
+  <p><strong>trading</strong> is grouped into UTC days. each day has a fixed emission; at the end of the day it is split among that day's traders in proportion to the USD fees they paid (open, tension, close and borrow fees on both markets). your share is an estimate while the day runs and becomes final and claimable at 00:00 UTC. because every point is bought with fees that go to the pool, farming by wash-trading costs real money.</p>
 
-  <h2 id="farm-math">The math</h2>
-  <p>These are the exact formulas the contract uses, with all divisions rounding down.</p>
-  <h3>Liquidity</h3>
-  <div class="eq">rewardPerToken += lpRate × Δt / totalLLP         (only while totalLLP &gt; 0, only until season end)
-earned(you)    += yourLLP × ΔrewardPerToken      (settled on every balance change and on claim)</div>
-  <h3>Trading</h3>
+  <h2 id="farm-math">the math</h2>
+  <p>these are the exact formulas the contract uses, with all divisions rounding down.</p>
+  <h3>liquidity</h3>
+  <div class="eq">rewardpertoken += lprate × δt / totalllp         (only while totalllp &gt; 0, only until season end)
+earned(you)    += yourllp × δrewardpertoken      (settled on every balance change and on claim)</div>
+  <h3>trading</h3>
   <div class="eq">epoch(t)       = floor(t / 1 day)                (UTC days)
-emission(e)    = tradeRate × seconds of day e inside the season
-share(you, e)  = emission(e) × yourFees(e) / totalFees(e)   (claimable once day e has ended)</div>
-  <h3>Guarantees</h3>
+emission(e)    = traderate × seconds of day e inside the season
+share(you, e)  = emission(e) × yourfees(e) / totalfees(e)   (claimable once day e has ended)</div>
+  <h3>guarantees</h3>
   <ul>
-    <li>No emission while nobody holds LLP; nothing is backfilled when the first LP arrives.</li>
-    <li>Every share rounds down, so the sum of all claims never exceeds <code>totalEmitted()</code>, and <code>totalEmitted()</code> never exceeds the season budget.</li>
-    <li>The season end is fixed in the contract. Extending it later does not pay for the gap.</li>
-    <li>These hold under a fuzz test of 10,000 random sequences of deposits, withdrawals, transfers, fees and time jumps, plus a full fork test suite against live Hooke contracts.</li>
+    <li>no emission while nobody holds LLP; nothing is backfilled when the first lp arrives.</li>
+    <li>every share rounds down, so the sum of all claims never exceeds <code>totalEmitted()</code>, and <code>totalEmitted()</code> never exceeds the season budget.</li>
+    <li>the season end is fixed in the contract. extending it later does not pay for the gap.</li>
+    <li>these hold under a fuzz test of 10,000 random sequences of deposits, withdrawals, transfers, fees and time jumps, plus a full fork test suite against live hooke contracts.</li>
   </ul>
 
-  <h2 id="memes">Other Hooke tokens</h2>
-  <p>Hooke's meme launchpad has 35 launches and, at the time of writing, one graduated token (WOLFPACK). Lasso does not list memes yet, on purpose: a graduated meme trades only in its own hXMAX pool, that pool holds roughly $75k of depth against a $2M market cap, and its hook has no TWAP. A perp on it would let anyone move the pool with a few thousand dollars and collect from LPs at leverage, and no fee or cap makes that safe at this depth.</p>
-  <p>What works today: memes are priced in hXMAX, so every meme holder is implicitly long XMAX. Shorting hXMAX on Lasso hedges that. Meme markets can be added the moment a pool is deep enough; the only requirement is a price source the pool cannot be pushed through cheaply.</p>
+  <h2 id="memes">other hooke tokens</h2>
+  <p>hooke's meme launchpad has 35 launches and, at the time of writing, one graduated token (WOLFPACK). lasso does not list memes yet, on purpose: a graduated meme trades only in its own hXMAX pool, that pool holds roughly $75k of depth against a $2m market cap, and its hook has no TWAP. a perp on it would let anyone move the pool with a few thousand dollars and collect from lps at leverage, and no fee or cap makes that safe at this depth.</p>
+  <p>what works today: memes are priced in hXMAX, so every meme holder is implicitly long XMAX. shorting hXMAX on lasso hedges that. meme markets can be added the moment a pool is deep enough; the only requirement is a price source the pool cannot be pushed through cheaply.</p>
 
-  <h2 id="risks">Risks</h2>
-  <div class="note"><strong class="dn">Unaudited.</strong> Lasso is v1 software. Leveraged trading can lose your whole collateral. Do not deposit what you cannot afford to lose.</div>
+  <h2 id="risks">risks</h2>
+  <div class="note"><strong class="dn">unaudited.</strong> lasso is v1 software. leveraged trading can lose your whole collateral. do not deposit what you cannot afford to lose.</div>
   <ul>
-    <li><strong>Oracle.</strong> XMAX depends on Hooke's single oracle publisher. If it stops, XMAX prices go stale and that market halts until it resumes; hXMAX keeps trading.</li>
-    <li><strong>Pool pricing.</strong> hXMAX is priced off a pool. The TWAP rule, Hooke's tax and the $100k per-side cap limit manipulation; they do not make it impossible.</li>
-    <li><strong>Keeper.</strong> Orders need a keeper to fill. If it is down, orders wait and can be cancelled for a full refund. Liquidations also depend on keepers, which is a risk to LPs.</li>
-    <li><strong>Liquidation is total.</strong> Leftover collateral goes to the pool.</li>
-    <li><strong>Admin.</strong> One owner key can change market parameters, fees, limits and price sources, and pause trading. It cannot take funds from the pool directly.</li>
-    <li><strong>Regulation.</strong> Leveraged exposure to equities is regulated in most places. Check your jurisdiction.</li>
+    <li><strong>oracle.</strong> XMAX depends on hooke's single oracle publisher. if it stops, XMAX prices go stale and that market halts until it resumes; hXMAX keeps trading.</li>
+    <li><strong>pool pricing.</strong> hXMAX is priced off a pool. the TWAP rule, hooke's tax and the $100k per-side cap limit manipulation; they do not make it impossible.</li>
+    <li><strong>keeper.</strong> orders need a keeper to fill. if it is down, orders wait and can be cancelled for a full refund. liquidations also depend on keepers, which is a risk to lps.</li>
+    <li><strong>liquidation is total.</strong> leftover collateral goes to the pool.</li>
+    <li><strong>admin.</strong> one owner key can change market parameters, fees, limits and price sources, and pause trading. it cannot take funds from the pool directly.</li>
+    <li><strong>regulation.</strong> leveraged exposure to equities is regulated in most places. check your jurisdiction.</li>
   </ul>
 
-  <h2 id="contracts">Contracts</h2>
-  <p>Robinhood Chain, chain id 4663. Collateral is USDG (<code>0x5fc5…d168</code>).</p>
+  <h2 id="contracts">contracts</h2>
+  <p>robinhood chain, chain id 4663. collateral is USDG (<code>0x5fc5…d168</code>).</p>
   <table>
-    <tr><th>Contract</th><th>Address</th></tr>
-    <tr><td>Lasso (pool, orders, positions)</td><td class="num">0xcBBe708dce939f2772B70967c1D0EB8e11b5DC27</td></tr>
-    <tr><td>LassoFarm ($LASSO emissions)</td><td class="num">0xC97493E716190bFC2cc7479ed28041EA295B1695</td></tr>
-    <tr><td>LLP (pool share token)</td><td class="num">0xBD380F2C9829816EDAc44335a7a081f3cd557FDb</td></tr>
-    <tr><td>HookePriceAdapter</td><td class="num">0xfF915229f38f74fe57410deB901Efb2ADe684c56</td></tr>
-    <tr><td>Hooke oracle registry</td><td class="num">0x33c5341DC45E389B2A993F4599649D121646240C</td></tr>
-    <tr><td>Hooke fee hook (hXMAX/USDG)</td><td class="num">0xb51d89BBc50B5AE469be8CFbF305CAb6ff3A50Cc</td></tr>
+    <tr><th>contract</th><th>address</th></tr>
+    <tr><td>lasso (pool, orders, positions)</td><td class="num">0xcbbe708dce939f2772b70967c1d0eb8e11b5dc27</td></tr>
+    <tr><td>lassofarm ($lasso emissions)</td><td class="num">0xc97493e716190bfc2cc7479ed28041ea295b1695</td></tr>
+    <tr><td>LLP (pool share token)</td><td class="num">0xbd380f2c9829816edac44335a7a081f3cd557fdb</td></tr>
+    <tr><td>hookepriceadapter</td><td class="num">0xff915229f38f74fe57410deb901efb2ade684c56</td></tr>
+    <tr><td>hooke oracle registry</td><td class="num">0x33c5341dc45e389b2a993f4599649d121646240c</td></tr>
+    <tr><td>hooke fee hook (hXMAX/USDG)</td><td class="num">0xb51d89bbc50b5ae469be8cfbf305cab6ff3a50cc</td></tr>
   </table>
-  <p>Parameters: order TTL 5 min · pool-market execution delay 2 s · protocol fee share 20% · liquidation reward $1 · min collateral $5 · oracle staleness grace 120 s.</p>
+  <p>parameters: order ttl 5 min · pool-market execution delay 2 s · protocol fee share 20% · liquidation reward $1 · min collateral $5 · oracle staleness grace 120 s.</p>
 </article>
 </div>
 
 <footer>
-  <span>Lasso · perpetuals on Hooke · Robinhood Chain</span>
+  <span>lasso · perpetuals on hooke · robinhood chain</span>
   <span class="sp"></span>
-  <a href="index.html">Home</a>
-  <a href="app.html">App</a>
-  <a href="https://robinhoodchain.blockscout.com/address/0xcBBe708dce939f2772B70967c1D0EB8e11b5DC27" target="_blank" rel="noopener">Contracts</a>
+  <a href="/">home</a>
+  <a href="/trade">app</a>
+  <a href="https://robinhoodchain.blockscout.com/address/0xcBBe708dce939f2772B70967c1D0EB8e11b5DC27" target="_blank" rel="noopener">contracts</a>
 </footer>
+<script>
+// in-page links scroll without putting a #fragment in the address bar
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="#"]'); if (!a) return;
+  const el = document.getElementById(a.getAttribute('href').slice(1)); if (!el) return;
+  e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' });
+});
+</script>
 </body>
 </html>

@@ -1,6 +1,5 @@
-// Copy to config.js (gitignored) and set rpc. Shared frontend config. Everything here is public: the browser has to see it to talk to the chain.
-// rpc: paste your Alchemy URL here (and allowlist your domain in Alchemy), or point it at keeper/rpc-proxy.mjs
-// to keep the key off the client entirely.
+// Frontend config. On Cloudflare Pages, gen-config.mjs writes config.js from this file at build time with
+// rpc = RPC_URL (e.g. https://lassodex.fun/rpc, served by functions/rpc.js). Locally, copy to config.js.
 window.LASSO = {
   rpc: 'https://rpc.mainnet.chain.robinhood.com',
   chainId: 4663,
