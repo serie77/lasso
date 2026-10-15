@@ -73,11 +73,11 @@ Secrets live in `.env` (copy `.env.example`); it is gitignored, as is `web/confi
 **Keeper (must run 24/7 or orders never fill).** Self-contained, no build needed. On Railway: root `keeper/`, start
 `npm start`, env `KEEPER_KEY`, `LASSO=0xcBBe708dce939f2772B70967c1D0EB8e11b5DC27`. Each fill costs ~$0.03 in gas.
 
-**Site (Cloudflare Pages, lassodex.fun).** `web/` is static with clean URLs: `/` (landing), `/trade`, `/earn`,
-`/farm` (one page, `trade.html`, routed by path via `_redirects`), `/docs`. `web/functions/rpc.js` serves `/rpc`, a read-only proxy to Alchemy, so the key stays server-side.
-Pages settings: root directory `web`, build command `node gen-config.mjs`, output directory `.`, env vars
-`RPC_URL=https://lassodex.fun/rpc` and `ALCHEMY_URL` (encrypted, the full Alchemy URL). Locally: copy
-`web/config.example.js` to `web/config.js`, then `node serve-web.mjs` (behaves like Pages).
+**Site (Vercel, lassodex.fun).** `web/` is static with clean URLs: `/` (landing), `/trade`, `/earn`, `/farm` (one
+page, `trade.html`, routed by path in `vercel.json`), `/docs`. `web/api/rpc.js` serves `/rpc`, a read-only proxy to
+Alchemy, so the key stays server-side. Vercel project: root directory `web`, framework Other, build command
+`node gen-config.mjs`, output directory `.`, env vars `RPC_URL=/rpc` and `ALCHEMY_URL` (the full Alchemy URL).
+Locally: copy `web/config.example.js` to `web/config.js`, then `node serve-web.mjs` (behaves like Vercel).
 
 **Brand.** `brand/lasso-avatar.png` (1000×1000), `brand/lasso-banner.png` (3000×1000), `brand/mark.svg`.
 

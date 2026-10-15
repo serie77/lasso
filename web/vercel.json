@@ -1,0 +1,11 @@
+{
+  "cleanUrls": true,
+  "redirects": [
+    { "source": "/app", "destination": "/trade", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/earn", "destination": "/trade.html" },
+    { "source": "/farm", "destination": "/trade.html" },
+    { "source": "/rpc", "destination": "/api/rpc" }
+  ]
+}

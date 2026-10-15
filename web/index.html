@@ -164,7 +164,7 @@ footer a { color: var(--dim) } footer a:hover { color: var(--mut) }
 <script type="module">
 import { createPublicClient, http, parseAbi, formatUnits } from 'https://cdn.jsdelivr.net/npm/viem@2.21.0/+esm';
 const C = window.LASSO;
-const pub = createPublicClient({ transport: http(C.rpc) });
+const pub = createPublicClient({ transport: http(new URL(C.rpc, location.href).href) });
 const L = { address: C.lasso, abi: parseAbi(['function markPrice(uint16) view returns (uint256,bool)']) };
 const A = { address: C.adapter, abi: parseAbi(['function hookeState(address) view returns (uint256,uint256,int256,uint256,uint256,bool)']) };
 const px = v => '$' + Number(formatUnits(v, 18)).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });

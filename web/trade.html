@@ -344,7 +344,7 @@ import { createPublicClient, createWalletClient, custom, http, parseAbi, formatU
 
 // ---------- config ----------
 const C = window.LASSO;
-const RPC = C.rpc;
+const RPC = new URL(C.rpc, location.href).href; // rpc may be relative, e.g. /rpc
 const EXPLORER = C.explorer;
 const CHAIN = { id: 4663, name: 'Robinhood Chain', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.mainnet.chain.robinhood.com'] } }, blockExplorers: { default: { name: 'Blockscout', url: EXPLORER } }, contracts: { multicall3: { address: '0xcA11bde05977b3631167028862bE2a173976CA11' } } };
 

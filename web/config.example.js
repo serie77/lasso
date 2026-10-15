@@ -1,5 +1,5 @@
-// Frontend config. On Cloudflare Pages, gen-config.mjs writes config.js from this file at build time with
-// rpc = RPC_URL (e.g. https://lassodex.fun/rpc, served by functions/rpc.js). Locally, copy to config.js.
+// Frontend config. On Vercel, gen-config.mjs writes config.js from this file at build time with rpc = RPC_URL
+// (set it to /rpc, served by api/rpc.js). Locally, copy to config.js and point rpc at a full RPC URL.
 window.LASSO = {
   rpc: 'https://rpc.mainnet.chain.robinhood.com',
   chainId: 4663,
